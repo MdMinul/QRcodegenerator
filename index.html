@@ -438,8 +438,8 @@
       display:block;
       border-radius: 16px;
       overflow:hidden;
-      background: transparent; /*remove white box: #ffffff; */
-      padding: 0;   /* remove border thickness: 10px; */
+      background: transparent;   /* remove white box #ffffff;*/
+      padding: 0;                /* remove border thickness 10px;*/
       box-shadow: 0 10px 30px rgba(0,0,0,.22);
     }
     .frame-label{
@@ -876,7 +876,7 @@ qr.update({
   data: s.data,
   margin: s.margin,
   qrOptions: { errorCorrectionLevel: s.ecc },
-  backgroundOptions: { color: s.bg },
+  backgroundOptions: { color: s.bg }, //"transparent"
 
   // ✅ this is the key fix
   dotsOptions,
@@ -1048,7 +1048,7 @@ qr.update({
     // Inner white card
     ctx.save();
     roundRect(pad-6, pad-6, qrW+12, qrH+12, 18);
-    ctx.fillStyle = "#ffffff";
+    ctx.fillStyle = s.bg;   // use user background, not white "#ffffff";
     ctx.fill();
     ctx.restore();
 
@@ -1215,7 +1215,7 @@ qr.update({
       data: target.data,
       margin: target.margin,
       qrOptions: { errorCorrectionLevel: target.ecc },
-      backgroundOptions: { color: target.bg },
+      backgroundOptions: { color: target.bg  }, //"transparent"
       dotsOptions: target.useGradient
         ? { type: target.dotType, gradient: { type:"linear", rotation:0, colorStops:[{offset:0,color:target.gradA},{offset:1,color:target.gradB}] } }
         : { type: target.dotType, color: target.fg },
