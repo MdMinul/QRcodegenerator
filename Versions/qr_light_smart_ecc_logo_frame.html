@@ -1,0 +1,1514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Styled QR Code Generator • Md Minul Alam</title>
+
+  <!-- QR Styling Library (CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.6.0/lib/qr-code-styling.js"></script>
+
+  <style>
+    /* =========================
+       LIGHT THEME
+       ========================= */
+    :root{
+      --bg1:#f6f9fc;
+      --bg2:#e9eff5;
+
+      --card: rgba(255,255,255,.88);
+      --card2: rgba(255,255,255,.78);
+      --border: rgba(15,23,42,.10);
+
+      --text: rgba(15,23,42,.95);
+      --muted: rgba(15,23,42,.70);
+      --muted2: rgba(15,23,42,.55);
+
+      --accent:#2563eb;     /* blue */
+      --accent2:#16a34a;    /* green */
+      --danger:#e11d48;     /* red */
+
+      --shadow: 0 12px 32px rgba(15,23,42,.10);
+      --radius: 18px;
+    }
+
+    *{ box-sizing: border-box; }
+    body{
+      margin:0; min-height:100vh;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      color: var(--text);
+
+      background:
+        radial-gradient(900px 420px at 10% 10%, rgba(37,99,235,.10), transparent 60%),
+        radial-gradient(720px 360px at 90% 20%, rgba(22,163,74,.10), transparent 55%),
+        radial-gradient(900px 600px at 40% 90%, rgba(225,29,72,.07), transparent 60%),
+        linear-gradient(135deg, var(--bg1), var(--bg2));
+
+      display:flex;
+      flex-direction:column;          /* sticky footer layout */
+      align-items:center;
+      justify-content:flex-start;
+      padding: 26px 14px 0;
+    }
+
+    .wrap{ width:min(1180px,100%); display:grid; gap:18px; grid-template-columns:1.2fr .8fr;  margin-bottom: 18px; }
+    @media (max-width:980px){ .wrap{ grid-template-columns:1fr; } }
+
+    .panel{
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      overflow:hidden;
+    }
+
+    .header{
+      padding: 22px 22px 18px;
+      display:flex; align-items:center; gap:14px;
+      border-bottom: 1px solid rgba(15,23,42,.08);
+      background: linear-gradient(180deg, rgba(255,255,255,.75), rgba(255,255,255,.40));
+    }
+
+    .avatar{
+      width:54px; height:54px; border-radius:50%;
+      border:2px solid rgba(37,99,235,.35);
+      object-fit:cover; background:#fff;
+    }
+
+    .title h1{ font-size:18px; margin:0; letter-spacing:.2px; }
+    .title p{ margin:2px 0 0; font-size:13px; color:var(--muted); }
+
+    .content{ padding: 18px 22px 22px; }
+
+    .label{
+      font-size:12px; color:var(--muted2);
+      margin:4px 0 8px;
+      display:flex; justify-content:space-between; align-items:center; gap:10px;
+    }
+
+    input, select{
+      width:100%;
+      padding: 13px 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(15,23,42,.12);
+      background: rgba(255,255,255,.72);
+      color: var(--text);
+      outline:none;
+      font-size: 14px;
+    }
+    input:focus, select:focus{
+      border-color: rgba(37,99,235,.45);
+      box-shadow: 0 0 0 4px rgba(37,99,235,.12);
+    }
+
+    /* range slider */
+    input[type="range"]{
+      width: 100%;
+      padding: 0;
+      height: 38px;
+      accent-color: var(--accent);
+      background: transparent;
+      border: 0;
+    }
+
+    .btn{
+      border:0; cursor:pointer;
+      padding: 12px 14px;
+      border-radius: 14px;
+      font-weight:650; font-size:14px;
+      transition: transform .08s ease, filter .12s ease;
+      user-select:none;
+      display:inline-flex; align-items:center; justify-content:center;
+      gap:8px; white-space:nowrap;
+    }
+    .btn:active{ transform: translateY(1px); }
+    .btn-primary{ background: linear-gradient(135deg, var(--accent), #1d4ed8); color:#fff; }
+    .btn-secondary{ background: rgba(255,255,255,.72); color: var(--text); border: 1px solid rgba(15,23,42,.12); }
+    .btn-success{ background: linear-gradient(135deg, var(--accent2), #15803d); color:#fff; }
+    .btn-danger{ background: rgba(225,29,72,.10); color: rgba(225,29,72,.95); border: 1px solid rgba(225,29,72,.22); }
+
+    .tools{ margin-top: 12px; display:flex; gap:10px; flex-wrap:wrap; }
+    .tools .btn{ flex:1; min-width: 160px; }
+
+    .grid{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:12px; }
+    @media (max-width:560px){ .grid{ grid-template-columns:1fr; } }
+
+    .field{
+      background: rgba(255,255,255,.70);
+      border: 1px solid rgba(15,23,42,.10);
+      border-radius: 16px;
+      padding: 10px;
+    }
+    .field .k{ font-size:12px; color:var(--muted2); margin:2px 0 8px; }
+
+    .color-row{ display:flex; align-items:center; gap:10px; }
+    input[type="color"]{
+      width:52px; height:44px; padding:0;
+      border-radius: 14px;
+      border: 1px solid rgba(15,23,42,.12);
+      background: transparent; cursor:pointer;
+    }
+
+    .hint{
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+
+    .preview{ padding: 18px 22px 22px; display:flex; flex-direction: column; gap: 12px; }
+
+    .qr-card{
+      background: var(--card2);
+      border: 1px solid rgba(15,23,42,.10);
+      border-radius: var(--radius);
+      padding: 16px;
+      min-height: 320px;
+      position: relative;
+      overflow:hidden;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .qr-card::before{
+      content:"";
+      position:absolute; inset:-60px;
+      background:
+        radial-gradient(circle at 30% 30%, rgba(37,99,235,.10), transparent 55%),
+        radial-gradient(circle at 80% 70%, rgba(22,163,74,.09), transparent 55%);
+      filter: blur(10px);
+      opacity:.9;
+      pointer-events:none;
+    }
+
+    #qrMount{
+      position: relative;
+      z-index: 1;
+      border-radius: 16px;
+      overflow:hidden;
+      box-shadow: 0 18px 40px rgba(15,23,42,.16);
+      display:none; /* hidden until Generate */
+    }
+
+    .emptyState{
+      position:relative; z-index:1;
+      text-align:center;
+      color: rgba(15,23,42,.70);
+      font-size: 13px;
+      line-height: 1.4;
+      max-width: 280px;
+    }
+
+    .meta{
+      display:flex;
+      justify-content: space-between;
+      align-items:center;
+      gap: 10px;
+      margin-top: 4px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: rgba(255,255,255,.70);
+      border: 1px solid rgba(15,23,42,.10);
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .meta span{
+      overflow:hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 60%;
+    }
+
+    .history-head{
+      display:flex; justify-content: space-between; align-items:center;
+      gap:10px; margin: 16px 0 10px;
+    }
+    .history-head h2{ margin:0; font-size: 14px; letter-spacing:.2px; }
+
+    .list{
+      display:flex; flex-direction: column; gap: 10px;
+      max-height: 320px; overflow:auto; padding-right: 4px;
+    }
+
+    .item{
+      background: rgba(255,255,255,.70);
+      border: 1px solid rgba(15,23,42,.10);
+      border-radius: 16px;
+      padding: 12px 12px;
+      display:flex; gap:10px; align-items:center;
+    }
+    .item .text{ flex: 1; min-width: 0; cursor:pointer; }
+    .item .text .t{
+      font-size: 13px; color: var(--text);
+      overflow:hidden; text-overflow: ellipsis; white-space: nowrap;
+      margin-bottom: 4px;
+    }
+    .item .text .d{
+      font-size: 11px; color: var(--muted2);
+      overflow:hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+
+    .item .actions{ display:flex; gap:8px; align-items:center; }
+
+    .iconbtn{
+      width: 38px; height: 38px;
+      border-radius: 12px;
+      border: 1px solid rgba(15,23,42,.12);
+      background: rgba(255,255,255,.70);
+      color: var(--text);
+      cursor:pointer;
+      display:flex; align-items:center; justify-content:center;
+      transition: filter .12s ease;
+      user-select:none;
+    }
+    .iconbtn:hover{ filter: brightness(1.04); }
+    .iconbtn.danger{
+      border-color: rgba(225,29,72,.22);
+      background: rgba(225,29,72,.10);
+      color: rgba(225,29,72,.95);
+    }
+
+    .toast{
+      position: fixed;
+      left: 50%;
+      bottom: 18px;
+      transform: translateX(-50%);
+      background: rgba(15,23,42,.88);
+      border: 1px solid rgba(255,255,255,.18);
+      color: rgba(255,255,255,.92);
+      padding: 10px 12px;
+      border-radius: 14px;
+      box-shadow: 0 18px 44px rgba(15,23,42,.24);
+      font-size: 13px;
+      opacity: 0;
+      pointer-events:none;
+      transition: opacity .18s ease, transform .18s ease;
+      backdrop-filter: blur(10px);
+    }
+    .toast.show{ opacity: 1; transform: translateX(-50%) translateY(-4px); }
+
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.70);
+      border: 1px solid rgba(15,23,42,.10);
+      font-size: 12px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .list::-webkit-scrollbar{ width: 8px; }
+    .list::-webkit-scrollbar-thumb{ background: rgba(15,23,42,.12); border-radius: 20px; }
+
+    /* ---------- Footer (sticky) ---------- */
+    .site-footer{
+      width: 100%;
+      margin-top: auto;
+      padding: 18px 14px 22px;
+      border-top: 1px solid rgba(15,23,42,.08);
+      background: rgba(255,255,255,.65);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      position: relative;
+    }
+
+    .site-footer::before{
+      content:"";
+      position:absolute;
+      left: 0; right: 0; top: 0;
+      height: 2px;
+      background: linear-gradient(90deg,
+        rgba(37,99,235,0),
+        rgba(37,99,235,.25),
+        rgba(22,163,74,.18),
+        rgba(225,29,72,.14),
+        rgba(37,99,235,0)
+      );
+      opacity: .9;
+      pointer-events:none;
+    }
+
+    .footer-inner{
+      width: min(1180px, 100%);
+      margin: 0 auto;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .footer-links{
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .footer-links a{
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.92);
+      border: 1px solid rgba(15,23,42,.10);
+      color: rgba(15,23,42,.92);
+      font-size: 13px;
+      font-weight: 650;
+      text-decoration: none;
+      user-select: none;
+      transition:
+        transform .14s ease,
+        filter .14s ease,
+        box-shadow .14s ease,
+        border-color .14s ease,
+        background .14s ease;
+    }
+
+    .footer-links a:hover{
+      transform: translateY(-1px);
+      filter: brightness(1.02);
+      border-color: rgba(37,99,235,.20);
+      box-shadow: 0 10px 24px rgba(15,23,42,.12);
+      background: rgba(255,255,255,.96);
+    }
+
+    .footer-links .ico{
+      width: 18px; height: 18px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .footer-links svg{
+      width: 18px;
+      height: 18px;
+      fill: rgba(15,23,42,.92);
+      opacity: .95;
+      transition: transform .14s ease, opacity .14s ease;
+    }
+
+    .footer-links a:hover svg{
+      transform: translateY(-.25px);
+      opacity: 1;
+    }
+
+    .footer-text{
+      font-size: 12px;
+      color: rgba(15,23,42,.60);
+      line-height: 1.4;
+    }
+
+    /* ---------- Organization helpers ---------- */
+    .field-span2{ grid-column: 1 / -1; }
+    .hint.small{ margin-top: 8px; font-size: 11px; color: var(--muted2); }
+
+    /* ---------- Frame controls ---------- */
+    .frame-controls{
+      display:grid;
+      grid-template-columns: 170px 1fr 1fr;
+      gap:10px;
+      align-items:center;
+    }
+    @media (max-width:760px){
+      .frame-controls{ grid-template-columns: 1fr; }
+    }
+    .check{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      font-size: 13px;
+      color: rgba(15,23,42,.88);
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: rgba(255,255,255,.72);
+      border: 1px solid rgba(15,23,42,.10);
+      user-select:none;
+      width: fit-content;
+    }
+    .check input{ width: 18px; height: 18px; }
+    .mini-color{ display:flex; align-items:center; gap:10px; }
+    .mini-color input[type="color"]{ width:52px; height:44px; }
+
+    /* ---------- Frame rendering (preview) ---------- */
+    .frame-wrap{
+      position: relative;
+      z-index: 1;
+      display:flex;
+      flex-direction: column;
+      align-items:center;
+      justify-content:center;
+      gap: 12px;
+      padding: 18px 18px 16px;
+      border-radius: 22px;
+      box-shadow: 0 18px 40px rgba(15,23,42,.14);
+    }
+    .frame-wrap #qrMount{
+      display:block;
+      border-radius: 16px;
+      overflow:hidden;
+      background: transparent;
+      padding: 0;
+      box-shadow: 0 10px 24px rgba(15,23,42,.12);
+    }
+    .frame-label{
+      font-weight: 800;
+      letter-spacing: .08em;
+      font-size: 20px;
+      color: #ffffff;
+      line-height: 1;
+      padding: 6px 10px 2px;
+      user-select:none;
+    }
+    .frame-simple{
+      background: transparent !important;
+      border: 2px solid rgba(15,23,42,.18);
+      box-shadow: 0 18px 40px rgba(15,23,42,.12);
+    }
+    .frame-simple .frame-label{ display:none; }
+    .frame-pill .frame-label{
+      font-size: 15px;
+      padding: 10px 16px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.28);
+      border: 1px solid rgba(255,255,255,.35);
+      letter-spacing: .06em;
+    }
+
+    /* tiny inline hint badge */
+    .inline-badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      font-size:12px;
+      color: var(--muted);
+    }
+    .inline-badge b{ color: rgba(15,23,42,.90); }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+
+    <!-- LEFT -->
+    <section class="panel">
+      <div class="header">
+        <img class="avatar" id="profilePic"
+             src="https://i1.rgstatic.net/ii/profile.image/11431281222331997-1707176777369_Q512/Md-Minul-Alam.jpg"
+             alt="Profile"/>
+        <div class="title">
+          <h1 id="profileName">Smart QR Code Generator</h1>
+          <p>
+            Developed by
+            <a href="https://sites.google.com/view/mdminulalam/home"
+               style="color: inherit; text-decoration: underline;"
+               target="_blank" rel="noopener">Md Minul Alam</a>
+          </p>
+          <p>QR Code Dashboard • Styled QR • Download • History</p>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="label">
+          <span>Enter any text / URL</span>
+          <span id="countInfo">0 saved</span>
+        </div>
+
+        <input id="text" placeholder="Type or paste a URL / Text" />
+
+        <div class="tools">
+          <button class="btn btn-primary" onclick="generateClassic()">⚡ Generate</button>
+          <button class="btn btn-secondary" onclick="saveCurrent()">💾 Save to History</button>
+          <button class="btn btn-secondary" onclick="resetAll()">↺ Reset</button>
+        </div>
+
+        <!-- OPTIONS -->
+        <div class="grid">
+          <div class="field">
+            <div class="k">Preset style</div>
+            <select id="preset">
+              <option value="classic" selected>Classic (Black/White)</option>
+              <option value="neon">Neon</option>
+              <option value="minimal">Minimal</option>
+              <option value="invert">Inverted</option>
+              <option value="sunset">Sunset Gradient</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <div class="k">Logo (optional URL)</div>
+            <input id="logoUrl" placeholder="https://.../logo.png (optional)" />
+          </div>
+
+          <div class="field field-span2">
+            <div class="k">Logo size <span class="inline-badge">(recommended ≤ <b>22%</b> for best scanning)</span></div>
+            <div style="display:flex; gap:10px; align-items:center;">
+              <input type="range" id="logoSize" min="0.10" max="0.35" step="0.01" value="0.22" />
+              <input id="logoSizeText" value="22%" style="width:110px;" />
+            </div>
+            <div class="hint small">Tip: When a logo is used, ECC automatically switches to <b>H (30%)</b>.</div>
+          </div>
+
+          <div class="field">
+            <div class="k">Dots shape</div>
+            <select id="dotType">
+              <option value="square" selected>Square</option>
+              <option value="rounded">Rounded</option>
+              <option value="dots">Dots</option>
+              <option value="classy">Classy</option>
+              <option value="classy-rounded">Classy Rounded</option>
+              <option value="extra-rounded">Extra Rounded</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <div class="k">Corner squares</div>
+            <select id="cornerSquareType">
+              <option value="square" selected>Square</option>
+              <option value="extra-rounded">Extra Rounded</option>
+              <option value="dot">Dot</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <div class="k">Corner dots</div>
+            <select id="cornerDotType">
+              <option value="square" selected>Square</option>
+              <option value="dot">Dot</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <div class="k">Error correction</div>
+            <select id="ecc">
+              <option value="L">L (7%)</option>
+              <option value="M">M (15%)</option>
+              <option value="Q" selected>Q (25%)</option>
+              <option value="H">H (30%)</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <div class="k">Foreground</div>
+            <div class="color-row">
+              <input type="color" id="fg" value="#000000"/>
+              <input id="fgHex" value="#000000"/>
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="k">Background</div>
+            <div class="color-row">
+              <input type="color" id="bg" value="#ffffff"/>
+              <input id="bgHex" value="#ffffff"/>
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="k">Size (px)</div>
+            <select id="size">
+              <option value="220">220</option>
+              <option value="280">280</option>
+              <option value="320" selected>320</option>
+              <option value="360">360</option>
+              <option value="420">420</option>
+              <option value="520">520</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <div class="k">Margin</div>
+            <select id="margin">
+              <option value="0">0</option>
+              <option value="4" selected>4</option>
+              <option value="8">8</option>
+              <option value="12">12</option>
+              <option value="16">16</option>
+            </select>
+          </div>
+
+          <div class="field field-span2">
+            <div class="k">Frame</div>
+            <div class="frame-controls">
+              <label class="check">
+                <input type="checkbox" id="frameEnable" />
+                <span>Enable frame</span>
+              </label>
+
+              <select id="frameStyle" title="Frame style">
+                <option value="scan" selected>Scan Me</option>
+                <option value="simple">Simple border</option>
+                <option value="pill">Pill label</option>
+                <option value="none">No frame</option>
+              </select>
+
+              <input id="frameText" placeholder="Frame text (e.g., SCAN ME)" value="SCAN ME" />
+
+              <div class="mini-color">
+                <input type="color" id="frameColor" value="#790c0c"/>
+                <input id="frameColorHex" value="#790c0c"/>
+              </div>
+
+              <select id="frameFont" title="Frame font">
+                <option value="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial" selected>Sans-Serif</option>
+                <option value="ui-serif, Georgia, 'Times New Roman', Times, serif">Serif</option>
+                <option value="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace">Monospace</option>
+              </select>
+            </div>
+
+            <div class="hint small">
+              Tip: Frame is included in <b>Download</b> when enabled.
+            </div>
+          </div>
+
+        </div>
+
+        <div class="hint">
+          ✅ Default preview is empty. Click <b>Generate</b> to create Classic QR first. <br/>
+          After generation, any style/color/shape changes update instantly.
+        </div>
+
+        <div class="history-head">
+          <h2>History</h2>
+          <div style="display:flex; gap:10px; align-items:center;">
+            <span class="pill" id="stylePill">Not generated yet</span>
+            <button class="btn btn-danger" onclick="clearHistory()">Clear</button>
+          </div>
+        </div>
+
+        <div class="list" id="history"></div>
+      </div>
+    </section>
+
+    <!-- RIGHT -->
+    <aside class="panel">
+      <div class="header">
+        <div class="title">
+          <h1>Preview</h1>
+          <p>Scan it with your phone camera</p>
+        </div>
+      </div>
+
+      <div class="preview">
+        <div class="qr-card">
+          <div id="emptyPreview" class="emptyState">
+            No QR yet.<br/>
+            Paste/type text and click <b>Generate</b>.
+          </div>
+          <div id="frameWrap" class="frame-wrap frame-scan" style="display:none;">
+            <div id="qrMount"></div>
+            <div id="frameLabel" class="frame-label">SCAN ME</div>
+          </div>
+        </div>
+
+        <div class="meta">
+          <span id="metaText">Waiting for generation…</span>
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-success" style="padding:10px 12px; border-radius:12px;" onclick="downloadPng()">⬇ Download</button>
+            <button class="btn btn-secondary" style="padding:10px 12px; border-radius:12px;" onclick="copyText()">🔗 Copy Text</button>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+  </div>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+
+      <div class="footer-links">
+        <a href="https://scholar.google.com/citations?user=Kbt7bTYAAAAJ&hl=en" target="_blank" rel="noopener" aria-label="Google Scholar">
+          <span class="ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24" role="img" focusable="false">
+              <path d="M12 3 1 9l11 6 9-4.91V17h2V9L12 3zm0 10.18L5.16 9 12 5.82 18.84 9 12 13.18z"/>
+              <path d="M6 12.5v4.1c0 1.66 2.69 3.4 6 3.4s6-1.74 6-3.4v-4.1l-6 3.27-6-3.27z"/>
+            </svg>
+          </span>
+          <span>Google Scholar</span>
+        </a>
+
+        <a href="https://www.researchgate.net/profile/Md-Minul-Alam" target="_blank" rel="noopener" aria-label="ResearchGate">
+          <span class="ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24" role="img" focusable="false">
+              <path d="M4 4h6.3c2.63 0 4.2 1.43 4.2 3.78 0 1.66-.73 2.86-2.02 3.43L15.9 20h-3.1l-3-7.9H7v7.9H4V4zm3 2.6v3.9h3.1c1.15 0 1.82-.7 1.82-1.95S11.25 6.6 10.1 6.6H7z"/>
+              <path d="M16.5 4H20v16h-3.5V4z"/>
+            </svg>
+          </span>
+          <span>ResearchGate</span>
+        </a>
+
+        <a href="https://www.linkedin.com/in/md-minul-alam/" target="_blank" rel="noopener" aria-label="LinkedIn">
+          <span class="ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24" role="img" focusable="false">
+              <path d="M4.98 3.5C4.98 4.88 3.87 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1 4.98 2.12 4.98 3.5zM0.5 23.5h4V7.98h-4V23.5zM8 7.98h3.83v2.12h.05c.53-1 1.83-2.12 3.77-2.12 4.03 0 4.78 2.65 4.78 6.1v9.42h-4v-8.36c0-1.99-.04-4.55-2.77-4.55-2.77 0-3.19 2.17-3.19 4.41v8.5H8V7.98z"/>
+            </svg>
+          </span>
+          <span>LinkedIn</span>
+        </a>
+      </div>
+
+      <div class="footer-text">
+        © <span id="year"></span> Md Minul Alam. All rights reserved.<br />
+        This is a client-side tool. No data is collected, stored, or transmitted.
+      </div>
+
+    </div>
+  </footer>
+
+  <div class="toast" id="toast">Done</div>
+
+  <script>
+    // footer year
+    document.addEventListener("DOMContentLoaded", () => {
+      const y = document.getElementById("year");
+      if (y) y.textContent = new Date().getFullYear();
+    });
+  </script>
+
+  <script>
+    const LS_KEY = "qrHistory_qrstyling_v3_light";
+    const el = (id)=>document.getElementById(id);
+
+    // --- helper: create a darker/lighter shade for gradient auto-adjust ---
+    function shadeColor(hex, percent) {
+      let r = parseInt(hex.substr(1,2),16);
+      let g = parseInt(hex.substr(3,2),16);
+      let b = parseInt(hex.substr(5,2),16);
+
+      r = Math.min(255, Math.max(0, r + (r * percent / 100)));
+      g = Math.min(255, Math.max(0, g + (g * percent / 100)));
+      b = Math.min(255, Math.max(0, b + (b * percent / 100)));
+
+      return "#" + [r,g,b].map(x => Math.round(x).toString(16).padStart(2,"0")).join("");
+    }
+
+    // State flag: live updates only after first generate
+    let isGenerated = false;
+    let typingTimer = null;
+
+    // Smart ECC: remember user's base ECC (default Q = 25%)
+    let baseECC = "Q";
+
+    function hasLogo(){
+      return ((el("logoUrl").value || "").trim().length > 0);
+    }
+
+    function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
+
+    function syncLogoSizeUI(){
+      const r = parseFloat(el("logoSize").value || "0.22");
+      const pct = Math.round(r * 100);
+      el("logoSizeText").value = pct + "%";
+    }
+
+    function parseLogoSize(){
+      // Accept either "22%" or "0.22"
+      const raw = (el("logoSizeText").value || "").trim();
+      let v;
+      if(raw.endsWith("%")){
+        v = parseFloat(raw.replace("%","")) / 100;
+      }else{
+        v = parseFloat(raw);
+        if(v > 1) v = v / 100; // if user types 22, treat as 22%
+      }
+      if(!isFinite(v)) v = parseFloat(el("logoSize").value || "0.22");
+      v = clamp(v, 0.10, 0.35);
+      el("logoSize").value = String(v.toFixed(2));
+      syncLogoSizeUI();
+      return v;
+    }
+
+    // Auto ECC rule:
+    // - logo present => H
+    // - no logo => user's baseECC (default Q)
+    function autoSetECC(){
+      const want = hasLogo() ? "H" : baseECC;
+      if (el("ecc").value !== want) {
+        el("ecc").value = want;
+        toast(hasLogo() ? "ECC set to H for logo" : `ECC set to ${want}`);
+      }
+    }
+
+    function warnIfLogoRisky(s){
+      if(!s || !hasLogo()) return;
+
+      // Heuristic thresholds
+      const L = s.logoSize || 0.22; // ratio
+      const ecc = s.ecc;
+
+      // Recommended safe max ratio by ECC (very rough but practical)
+      const maxByEcc = (ecc === "H") ? 0.28 : (ecc === "Q") ? 0.22 : (ecc === "M") ? 0.18 : 0.16;
+
+      // Also encourage larger QR sizes if logo exists
+      const sizeWarn = (s.size < 300);
+
+      if(L > maxByEcc){
+        toast(`Logo may be too large for ECC ${ecc}. Try ≤ ${Math.round(maxByEcc*100)}% or increase ECC.`);
+      }else if(sizeWarn){
+        toast("Tip: With a logo, use a larger size (≥ 320px) for best scanning.");
+      }
+    }
+
+    // QR instance (created once) — default ECC Q (25%)
+    const qr = new QRCodeStyling({
+      width: 320,
+      height: 320,
+      type: "canvas",
+      data: " ",
+      margin: 4,
+      qrOptions: { errorCorrectionLevel: "Q" },
+      backgroundOptions: { color: "#ffffff" },
+      dotsOptions: { type: "square", color: "#000000" },
+      cornersSquareOptions: { type: "square", color: "#000000" },
+      cornersDotOptions: { type: "square", color: "#000000" },
+      imageOptions: { crossOrigin: "anonymous", margin: 6, imageSize: 0.22 }
+    });
+
+    // mount once
+    qr.append(el("qrMount"));
+
+    // hide mount initially
+    el("frameWrap").style.display = "none";
+
+    function toast(msg){
+      const t = el("toast");
+      t.textContent = msg;
+      t.classList.add("show");
+      setTimeout(()=>t.classList.remove("show"), 1200);
+    }
+    function isValidHex(v){ return /^#([0-9a-fA-F]{6})$/.test(v); }
+
+    // presets: auto-set colors
+    function applyPreset(name){
+      const presets = {
+        classic: { fg:"#000000", bg:"#ffffff", gradient:false },
+        neon:    { fg:"#2563eb", bg:"#f8fafc", gradient:false },
+        minimal: { fg:"#1f2937", bg:"#ffffff", gradient:false },
+        invert:  { fg:"#ffffff", bg:"#000000", gradient:false },
+        sunset:  { fg:"#ff7a18", bg:"#ffffff", gradient:true, gradA:"#ff7a18", gradB:"#af002d" }
+      };
+
+      const p = presets[name] || presets.classic;
+
+      window.__useGradient = !!p.gradient;
+      window.__gradA = p.gradA || p.fg;
+      window.__gradB = p.gradB || p.fg;
+
+      el("fg").value = p.fg;
+      el("fgHex").value = p.fg;
+      el("bg").value = p.bg;
+      el("bgHex").value = p.bg;
+
+      if (isGenerated) updateLive();
+    }
+
+    function getState(){
+      const data = (el("text").value || "").trim();
+
+      // sync hex text to picker if valid
+      if(isValidHex(el("fgHex").value)) el("fg").value = el("fgHex").value;
+      if(isValidHex(el("bgHex").value)) el("bg").value = el("bgHex").value;
+
+      // track user-chosen ECC as base ONLY when no logo
+      if (!hasLogo()) baseECC = el("ecc").value;
+
+      const logoSize = parseLogoSize();
+
+      return {
+        data: data || " ",
+        fg: el("fg").value,
+        bg: el("bg").value,
+        size: parseInt(el("size").value, 10),
+        margin: parseInt(el("margin").value, 10),
+        ecc: el("ecc").value,             // will be auto-set if needed
+        dotType: el("dotType").value,
+        cornerSquareType: el("cornerSquareType").value,
+        cornerDotType: el("cornerDotType").value,
+        logo: (el("logoUrl").value || "").trim(),
+        logoSize: logoSize,               // 0.10–0.35
+        preset: el("preset").value,
+        useGradient: !!window.__useGradient,
+        gradA: window.__gradA || el("fg").value,
+        gradB: window.__gradB || el("fg").value,
+        frameEnabled: !!el("frameEnable").checked,
+        frameStyle: el("frameStyle").value,
+        frameText: (el("frameText").value || "SCAN ME").trim(),
+        frameColor: el("frameColor").value,
+        frameFont: el("frameFont").value
+      };
+    }
+
+    function updatePill(s){
+      const g = s.useGradient ? `gradient(${s.gradA}→${s.gradB})` : s.fg;
+      const logoTxt = s.logo ? ` • logo ${Math.round(s.logoSize*100)}%` : "";
+      el("stylePill").textContent =
+        `${s.dotType} • ${s.cornerSquareType}/${s.cornerDotType} • fg ${g} • bg ${s.bg} • ${s.size}px • m${s.margin} • ECC ${s.ecc}${logoTxt}`;
+    }
+
+    function updateMeta(s){
+      el("metaText").textContent = (s.data || "").trim() ? s.data : "Waiting for generation…";
+    }
+
+    function updateLive(){
+      if(!isGenerated) return;
+
+      // Auto-set ECC based on logo/base setting
+      autoSetECC();
+
+      const s = getState();
+
+      const dotsOptions = s.useGradient
+        ? {
+            type: s.dotType,
+            color: undefined,
+            gradient: {
+              type: "linear",
+              rotation: 0,
+              colorStops: [
+                { offset: 0, color: s.gradA },
+                { offset: 1, color: s.gradB }
+              ]
+            }
+          }
+        : {
+            type: s.dotType,
+            color: s.fg,
+            gradient: undefined
+          };
+
+      qr.update({
+        width: s.size,
+        height: s.size,
+        data: s.data,
+        margin: s.margin,
+        qrOptions: { errorCorrectionLevel: s.ecc },
+        backgroundOptions: { color: s.bg },
+        dotsOptions,
+        cornersSquareOptions: { type: s.cornerSquareType, color: s.fg },
+        cornersDotOptions: { type: s.cornerDotType, color: s.fg },
+        image: s.logo || undefined,
+        imageOptions: {
+          crossOrigin: "anonymous",
+          margin: 6,
+          imageSize: s.logo ? s.logoSize : 0.22,
+          hideBackgroundDots: true
+        }
+      });
+
+      // Optional extra padding around QR mount (visual only)
+      try{
+        const mount = el("qrMount");
+        if(mount) mount.style.padding = (10 + (s.margin||0)) + "px";
+      }catch(e){}
+
+      updatePill(s);
+      updateMeta(s);
+      window.__current = s;
+      updateFrame(s);
+
+      // Show scanning hints if logo is too aggressive
+      warnIfLogoRisky(s);
+    }
+
+    function debounceUpdate(){
+      if(!isGenerated) return;
+      clearTimeout(typingTimer);
+      typingTimer = setTimeout(updateLive, 150);
+    }
+
+    // Generate Classic first (ECC default Q at UI, but we still generate classic style)
+    function generateClassic(){
+      const text = (el("text").value || "").trim();
+      if(!text) return alert("Paste/type a text or URL first.");
+
+      // Force Classic defaults for the FIRST generation
+      el("preset").value = "classic";
+      window.__useGradient = false;
+      el("fg").value = "#000000"; el("fgHex").value = "#000000";
+      el("bg").value = "#ffffff"; el("bgHex").value = "#ffffff";
+      el("dotType").value = "square";
+      el("cornerSquareType").value = "square";
+      el("cornerDotType").value = "square";
+
+      // Default ECC Q (25%) and remember baseECC = Q
+      el("ecc").value = "Q";
+      baseECC = "Q";
+
+      el("size").value = "320";
+      el("margin").value = "4";
+
+      // Classic = no logo by default
+      el("logoUrl").value = "";
+      el("logoSize").value = "0.22";
+      el("logoSizeText").value = "22%";
+
+      // show qr area
+      el("emptyPreview").style.display = "none";
+      el("frameWrap").style.display = "flex";
+
+      // mark as generated and render
+      isGenerated = true;
+      updateLive();
+      toast("Generated (Classic)");
+    }
+
+    function updateFrame(s){
+      const wrap = el("frameWrap");
+      const label = el("frameLabel");
+      if(!wrap || !label) return;
+
+      if(!isGenerated){
+        wrap.style.display = "none";
+        return;
+      }
+
+      const enabled = !!s.frameEnabled && s.frameStyle !== "none";
+      wrap.style.display = "flex";
+
+      // classes
+      wrap.classList.remove("frame-scan","frame-simple","frame-pill");
+      if(!enabled){
+        // No frame: show only QR (no label)
+        wrap.style.background = "transparent";
+        wrap.style.padding = "0";
+        wrap.style.boxShadow = "none";
+        wrap.style.border = "none";
+        label.style.display = "none";
+        wrap.classList.add("frame-scan");
+        return;
+      }
+
+      // enabled styles
+      if(s.frameStyle === "simple") wrap.classList.add("frame-simple");
+      else if(s.frameStyle === "pill") wrap.classList.add("frame-pill");
+      else wrap.classList.add("frame-scan");
+
+      wrap.style.border = "none";
+      if(s.frameStyle === "simple"){
+        wrap.style.background = "transparent";
+        wrap.style.border = `2px solid ${s.frameColor || "#790c0c"}`;
+      }else{
+        wrap.style.background = s.frameColor || "#790c0c";
+      }
+
+      label.style.fontFamily = s.frameFont || "";
+      label.textContent = (s.frameText || "SCAN ME").toUpperCase();
+      label.style.display = (s.frameStyle === "simple") ? "none" : "block";
+
+      wrap.style.padding = "";
+      wrap.style.boxShadow = "";
+    }
+
+    async function exportWithFrame(){
+      const s = window.__current || getState();
+      const enabled = !!s.frameEnabled && s.frameStyle !== "none";
+      if(!enabled){
+        qr.download({ name: "qr", extension: "png" });
+        return;
+      }
+
+      const blob = await qr.getRawData("png");
+      const imgUrl = URL.createObjectURL(blob);
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+
+      await new Promise((resolve, reject)=>{
+        img.onload = resolve;
+        img.onerror = reject;
+        img.src = imgUrl;
+      });
+
+      const pad = (s.frameStyle === "simple") ? 18 : 26;
+      const labelH = (s.frameStyle === "simple") ? 0 : 78;
+
+      const qrW = img.width;
+      const qrH = img.height;
+
+      const outW = qrW + pad*2;
+      const outH = qrH + pad*2 + labelH;
+
+      const dpr = Math.max(1, window.devicePixelRatio || 1);
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.round(outW * dpr);
+      canvas.height = Math.round(outH * dpr);
+      const ctx = canvas.getContext("2d");
+      ctx.scale(dpr, dpr);
+
+      function roundRect(x, y, w, h, r){
+        const rr = Math.min(r, w/2, h/2);
+        ctx.beginPath();
+        ctx.moveTo(x+rr, y);
+        ctx.arcTo(x+w, y, x+w, y+h, rr);
+        ctx.arcTo(x+w, y+h, x, y+h, rr);
+        ctx.arcTo(x, y+h, x, y, rr);
+        ctx.arcTo(x, y, x+w, y, rr);
+        ctx.closePath();
+      }
+
+      // Frame background (rounded)
+      ctx.save();
+      roundRect(0, 0, outW, outH, 24);
+      ctx.clip();
+      ctx.fillStyle = s.frameColor || "#790c0c";
+      ctx.fillRect(0, 0, outW, outH);
+      ctx.restore();
+
+      // Inner card (match QR background)
+      ctx.save();
+      roundRect(pad-6, pad-6, qrW+12, qrH+12, 18);
+      ctx.fillStyle = s.bg;
+      ctx.fill();
+      ctx.restore();
+
+      // QR image
+      ctx.drawImage(img, pad, pad, qrW, qrH);
+
+      // Label
+      if(labelH > 0){
+        const text = (s.frameText || "SCAN ME").toUpperCase();
+        ctx.save();
+        ctx.fillStyle = "#ffffff";
+        ctx.font = `800 34px ${s.frameFont || "ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial"}`;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(text, outW/2, outH - labelH/2 + 2);
+        ctx.restore();
+      }
+
+      URL.revokeObjectURL(imgUrl);
+
+      const a = document.createElement("a");
+      a.download = "qr.png";
+      a.href = canvas.toDataURL("image/png");
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    }
+
+    function downloadPng(){
+      if(!isGenerated) return toast("Generate first");
+      const s = window.__current || getState();
+      if(s.frameEnabled && s.frameStyle !== "none"){
+        exportWithFrame().catch(()=>toast("Download failed"));
+      }else{
+        qr.download({ name: "qr", extension: "png" });
+      }
+    }
+
+    function copyText(){
+      const t = (el("text").value || "").trim();
+      if(!t) return toast("Nothing to copy");
+      navigator.clipboard.writeText(t).then(()=>toast("Copied")).catch(()=>toast("Copy blocked"));
+    }
+
+    // --------- history ----------
+    function loadHistory(){
+      try { return JSON.parse(localStorage.getItem(LS_KEY) || "[]"); }
+      catch(e){ return []; }
+    }
+    function saveHistoryArr(arr){ localStorage.setItem(LS_KEY, JSON.stringify(arr)); }
+    function escapeHtml(str){
+      return (str || "").replace(/[&<>"']/g, m => ({
+        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+      }[m]));
+    }
+    function jsEscape(str){
+      return (str || "").replace(/\\/g,"\\\\").replace(/'/g,"\\'").replace(/\n/g,"\\n").replace(/\r/g,"\\r");
+    }
+    function signature(s){
+      return [
+        s.data, s.size, s.margin, s.ecc,
+        s.dotType, s.cornerSquareType, s.cornerDotType,
+        s.fg, s.bg,
+        s.useGradient ? `G:${s.gradA}-${s.gradB}` : "G:NO",
+        s.logo || "",
+        s.logoSize || 0.22,
+        s.frameEnabled ? "F:1":"F:0",
+        s.frameStyle || "",
+        s.frameText || "",
+        s.frameColor || "",
+        s.frameFont || ""
+      ].join("||");
+    }
+
+    function saveCurrent(){
+      if(!isGenerated) return alert("Generate a QR first, then you can save it.");
+
+      const s = getState();
+      const text = (s.data || "").trim();
+      if(!text) return alert("Enter a text/URL first.");
+
+      let h = loadHistory();
+      const sig = signature(s);
+      h = h.filter(x => x.sig !== sig);
+      h.unshift({ sig, state: s, ts: new Date().toLocaleString() });
+      saveHistoryArr(h);
+      renderHistory();
+      toast("Saved");
+    }
+
+    function renderHistory(){
+      const box = el("history");
+      const h = loadHistory();
+      el("countInfo").textContent = `${h.length} saved`;
+
+      if(h.length === 0){
+        box.innerHTML = `<div style="color:rgba(15,23,42,.65); font-size:13px;">No history yet.</div>`;
+        return;
+      }
+
+      box.innerHTML = h.map((x, idx)=>{
+        const s = x.state || {};
+        const meta = `${s.dotType} • ${s.size}px • m${s.margin} • ECC ${s.ecc}${s.logo ? ` • logo ${Math.round((s.logoSize||0.22)*100)}%` : ""}`;
+        return `
+          <div class="item">
+            <div class="text" onclick="loadFromHistory(${idx})" title="Click to load">
+              <div class="t">${escapeHtml((s.data||"").trim())}</div>
+              <div class="d">${escapeHtml(x.ts || "")} • ${escapeHtml(meta)}</div>
+            </div>
+            <div class="actions">
+              <button class="iconbtn" title="Load" onclick="loadFromHistory(${idx}); event.stopPropagation();">👁</button>
+              <button class="iconbtn" title="Download" onclick="downloadHistory(${idx}); event.stopPropagation();">⬇</button>
+              <button class="iconbtn" title="Copy text" onclick="navigator.clipboard.writeText('${jsEscape((s.data||"").trim())}'); toast('Copied'); event.stopPropagation();">🔗</button>
+              <button class="iconbtn danger" title="Delete" onclick="deleteHistory(${idx}); event.stopPropagation();">🗑</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function loadFromHistory(i){
+      const h = loadHistory();
+      const item = h[i];
+      if(!item) return;
+      const s = item.state;
+
+      el("text").value = (s.data || "").trim();
+      el("preset").value = s.preset || "classic";
+
+      window.__useGradient = !!s.useGradient;
+      window.__gradA = s.gradA || s.fg;
+      window.__gradB = s.gradB || s.fg;
+
+      el("dotType").value = s.dotType || "square";
+      el("cornerSquareType").value = s.cornerSquareType || "square";
+      el("cornerDotType").value = s.cornerDotType || "square";
+
+      el("ecc").value = s.ecc || "Q";
+      baseECC = (s.ecc || "Q"); // base as loaded (auto will override if logo)
+
+      el("size").value = String(s.size || 320);
+      el("margin").value = String(s.margin ?? 4);
+
+      el("fg").value = s.fg || "#000000"; el("fgHex").value = el("fg").value;
+      el("bg").value = s.bg || "#ffffff"; el("bgHex").value = el("bg").value;
+
+      el("logoUrl").value = s.logo || "";
+      el("logoSize").value = String((s.logoSize ?? 0.22).toFixed(2));
+      syncLogoSizeUI();
+
+      // frame restore
+      el("frameEnable").checked = !!s.frameEnabled;
+      el("frameStyle").value = s.frameStyle || "scan";
+      el("frameText").value = (s.frameText || "SCAN ME");
+      el("frameColor").value = s.frameColor || "#790c0c"; el("frameColorHex").value = el("frameColor").value;
+      el("frameFont").value = s.frameFont || "ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial";
+
+      // show preview and enable live
+      el("emptyPreview").style.display = "none";
+      el("frameWrap").style.display = "flex";
+      isGenerated = true;
+      updateLive();
+      toast("Loaded");
+    }
+
+    function downloadHistory(i){
+      const h = loadHistory();
+      const item = h[i];
+      if(!item) return;
+
+      const target = item.state;
+
+      qr.update({
+        width: target.size,
+        height: target.size,
+        data: target.data,
+        margin: target.margin,
+        qrOptions: { errorCorrectionLevel: target.ecc },
+        backgroundOptions: { color: target.bg },
+        dotsOptions: target.useGradient
+          ? { type: target.dotType, gradient: { type:"linear", rotation:0, colorStops:[{offset:0,color:target.gradA},{offset:1,color:target.gradB}] } }
+          : { type: target.dotType, color: target.fg, gradient: undefined },
+        cornersSquareOptions: { type: target.cornerSquareType, color: target.fg },
+        cornersDotOptions: { type: target.cornerDotType, color: target.fg },
+        image: target.logo || undefined,
+        imageOptions: { crossOrigin: "anonymous", margin: 6, imageSize: target.logo ? (target.logoSize || 0.22) : 0.22, hideBackgroundDots: true }
+      });
+
+      // ensure visible
+      el("emptyPreview").style.display = "none";
+      el("frameWrap").style.display = "flex";
+
+      // Frame download if enabled
+      const wantsFrame = !!target.frameEnabled && target.frameStyle !== "none";
+      if(wantsFrame){
+        // Temporarily set current for exportWithFrame
+        window.__current = target;
+        exportWithFrame().catch(()=>toast("Download failed"));
+      }else{
+        qr.download({ name: "qr", extension: "png" });
+      }
+
+      isGenerated = true;
+      setTimeout(()=>updateLive(), 150);
+    }
+
+    function deleteHistory(i){
+      let h = loadHistory();
+      h.splice(i, 1);
+      saveHistoryArr(h);
+      renderHistory();
+      toast("Deleted");
+    }
+
+    function clearHistory(){
+      if(!confirm("Clear all history?")) return;
+      localStorage.removeItem(LS_KEY);
+      renderHistory();
+      toast("Cleared");
+    }
+
+    // --------- reset ----------
+    function resetAll(){
+      el("text").value = "";
+      el("preset").value = "classic";
+      el("logoUrl").value = "";
+      el("logoSize").value = "0.22";
+      syncLogoSizeUI();
+
+      el("dotType").value = "square";
+      el("cornerSquareType").value = "square";
+      el("cornerDotType").value = "square";
+
+      // default ECC Q (25%)
+      el("ecc").value = "Q";
+      baseECC = "Q";
+
+      el("size").value = "320";
+      el("margin").value = "4";
+      el("fg").value = "#000000"; el("fgHex").value = "#000000";
+      el("bg").value = "#ffffff"; el("bgHex").value = "#ffffff";
+      window.__useGradient = false;
+
+      // reset frame UI (optional)
+      el("frameEnable").checked = false;
+      el("frameStyle").value = "scan";
+      el("frameText").value = "SCAN ME";
+      el("frameColor").value = "#790c0c"; el("frameColorHex").value = "#790c0c";
+      el("frameFont").value = "ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial";
+
+      // hide preview again
+      isGenerated = false;
+      el("frameWrap").style.display = "none";
+      el("emptyPreview").style.display = "block";
+      el("stylePill").textContent = "Not generated yet";
+      el("metaText").textContent = "Waiting for generation…";
+      toast("Reset");
+    }
+
+    // --------- Live update listeners ----------
+    el("text").addEventListener("input", debounceUpdate);
+
+    ["dotType","cornerSquareType","cornerDotType","size","margin","frameStyle","frameFont"].forEach(id=>{
+      el(id).addEventListener("change", updateLive);
+    });
+
+    // ECC: remember base choice when no logo
+    el("ecc").addEventListener("change", ()=>{
+      if(!hasLogo()) baseECC = el("ecc").value;
+      updateLive();
+    });
+
+    el("logoUrl").addEventListener("input", ()=>{
+      if(isGenerated){
+        autoSetECC();
+      }
+      debounceUpdate();
+    });
+
+    // Logo size slider/text
+    el("logoSize").addEventListener("input", ()=>{
+      syncLogoSizeUI();
+      updateLive();
+    });
+    el("logoSizeText").addEventListener("input", debounceUpdate);
+    el("logoSizeText").addEventListener("change", ()=>{
+      parseLogoSize();
+      updateLive();
+    });
+
+    el("fg").addEventListener("input", ()=>{
+      const v = el("fg").value;
+      el("fgHex").value = v;
+
+      if (window.__useGradient) {
+        window.__gradA = v;
+        window.__gradB = shadeColor(v, -35);
+      }
+
+      updateLive();
+    });
+
+    el("bg").addEventListener("input", ()=>{ el("bgHex").value = el("bg").value; updateLive(); });
+
+    el("fgHex").addEventListener("input", ()=>{
+      if(isValidHex(el("fgHex").value)) {
+        const v = el("fgHex").value;
+        el("fg").value = v;
+
+        if (window.__useGradient) {
+          window.__gradA = v;
+          window.__gradB = shadeColor(v, -35);
+        }
+
+        updateLive();
+      }
+    });
+
+    el("bgHex").addEventListener("input", ()=>{
+      if(isValidHex(el("bgHex").value)) {
+        el("bg").value = el("bgHex").value;
+        updateLive();
+      }
+    });
+
+    el("preset").addEventListener("change", ()=>applyPreset(el("preset").value));
+
+    // frame listeners
+    el("frameEnable").addEventListener("change", updateLive);
+    el("frameText").addEventListener("input", debounceUpdate);
+
+    el("frameColor").addEventListener("input", ()=>{
+      el("frameColorHex").value = el("frameColor").value;
+      updateLive();
+    });
+    el("frameColorHex").addEventListener("input", ()=>{
+      const v = el("frameColorHex").value;
+      if(isValidHex(v)){
+        el("frameColor").value = v;
+        updateLive();
+      }
+    });
+
+    // init
+    function init(){
+      // Keep defaults consistent
+      syncLogoSizeUI();
+      renderHistory();
+      resetAll(); // empty preview + default ECC Q (25%)
+    }
+    init();
+  </script>
+</body>
+</html>

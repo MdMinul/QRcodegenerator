@@ -1,0 +1,1828 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Styled QR Code Generator</title>
+
+  <!-- QR Styling Library (CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.6.0/lib/qr-code-styling.js"></script>
+<script>
+  // footer year
+  document.addEventListener("DOMContentLoaded", () => {
+    const y = document.getElementById("year");
+    if (y) y.textContent = new Date().getFullYear();
+  });
+</script>
+
+  <style>
+    :root{
+      --bg1:#050b1e; --bg2:#07132f;
+      --card: rgba(255,255,255,.08);
+      --card2: rgba(255,255,255,.06);
+      --border: rgba(255,255,255,.12);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.70);
+      --muted2: rgba(255,255,255,.55);
+      --accent:#43c3ff; --accent2:#22c55e; --danger:#ff4d6d;
+      --shadow: 0 20px 60px rgba(0,0,0,.45);
+      --radius: 18px;
+    }
+
+    *{ box-sizing: border-box; }
+    body{
+      margin:0; min-height:100vh;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      color: var(--text);
+      background:
+        radial-gradient(1200px 600px at 15% 10%, rgba(67,195,255,.22), transparent 60%),
+        radial-gradient(900px 500px at 80% 20%, rgba(34,197,94,.18), transparent 55%),
+        radial-gradient(900px 600px at 40% 90%, rgba(255,77,109,.14), transparent 60%),
+        linear-gradient(135deg, var(--bg1), var(--bg2));
+      display:flex;
+      flex-direction:column;          /* sticky footer layout */
+      align-items:center;
+      justify-content:flex-start;
+      padding: 26px 14px 0;
+    }
+
+    .wrap{ width:min(1180px,100%); display:grid; gap:18px; grid-template-columns:1.2fr .8fr;  margin-bottom: 18px; }
+    @media (max-width:980px){ .wrap{ grid-template-columns:1fr; } }
+
+    .panel{
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      overflow:hidden;
+    }
+
+    .header{
+      padding: 22px 22px 18px;
+      display:flex; align-items:center; gap:14px;
+      border-bottom: 1px solid rgba(255,255,255,.10);
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.02));
+    }
+
+    .avatar{
+      width:54px; height:54px; border-radius:50%;
+      border:2px solid rgba(67,195,255,.6);
+      object-fit:cover; background:#fff;
+    }
+
+    .title h1{ font-size:18px; margin:0; letter-spacing:.2px; }
+    .title p{ margin:2px 0 0; font-size:13px; color:var(--muted); }
+
+    .content{ padding: 18px 22px 22px; }
+
+    .label{
+      font-size:12px; color:var(--muted2);
+      margin:4px 0 8px;
+      display:flex; justify-content:space-between; align-items:center; gap:10px;
+    }
+
+    input, select{
+      width:100%;
+      padding: 13px 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.18);
+      color: var(--text);
+      outline:none;
+      font-size: 14px;
+    }
+    input:focus, select:focus{
+      border-color: rgba(67,195,255,.55);
+      box-shadow: 0 0 0 4px rgba(67,195,255,.12);
+    }
+
+    .btn{
+      border:0; cursor:pointer;
+      padding: 12px 14px;
+      border-radius: 14px;
+      font-weight:650; font-size:14px;
+      transition: transform .08s ease, filter .12s ease;
+      user-select:none;
+      display:inline-flex; align-items:center; justify-content:center;
+      gap:8px; white-space:nowrap;
+    }
+    .btn:active{ transform: translateY(1px); }
+    .btn-primary{ background: linear-gradient(135deg, var(--accent), #2da8ff); color:#00121f; }
+    .btn-secondary{ background: rgba(255,255,255,.10); color: var(--text); border: 1px solid rgba(255,255,255,.14); }
+    .btn-success{ background: linear-gradient(135deg, var(--accent2), #16a34a); color:#06140b; }
+    .btn-danger{ background: rgba(255,77,109,.16); color:#ffd6de; border: 1px solid rgba(255,77,109,.25); }
+
+    .tools{ margin-top: 12px; display:flex; gap:10px; flex-wrap:wrap; }
+    .tools .btn{ flex:1; min-width: 160px; }
+
+    .grid{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:12px; }
+    @media (max-width:560px){ .grid{ grid-template-columns:1fr; } }
+
+    .field{
+      background: rgba(0,0,0,.14);
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 16px;
+      padding: 10px;
+    }
+    .field .k{ font-size:12px; color:var(--muted2); margin:2px 0 8px; }
+
+    .color-row{ display:flex; align-items:center; gap:10px; }
+    input[type="color"]{
+      width:52px; height:44px; padding:0;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: transparent; cursor:pointer;
+    }
+
+    .hint{
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+
+    .preview{ padding: 18px 22px 22px; display:flex; flex-direction: column; gap: 12px; }
+
+    .qr-card{
+      background: var(--card2);
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: var(--radius);
+      padding: 16px;
+      min-height: 320px;
+      position: relative;
+      overflow:hidden;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .qr-card::before{
+      content:"";
+      position:absolute; inset:-60px;
+      background: radial-gradient(circle at 30% 30%, rgba(67,195,255,.18), transparent 55%),
+                  radial-gradient(circle at 80% 70%, rgba(34,197,94,.14), transparent 55%);
+      filter: blur(10px);
+      opacity:.9;
+      pointer-events:none;
+    }
+
+    #qrMount{
+      position: relative;
+      z-index: 1;
+      border-radius: 16px;
+      overflow:hidden;
+      box-shadow: 0 18px 50px rgba(0,0,0,.35);
+      display:none; /* hidden until Generate */
+    }
+
+    .emptyState{
+      position:relative; z-index:1;
+      text-align:center;
+      color: rgba(255,255,255,.75);
+      font-size: 13px;
+      line-height: 1.4;
+      max-width: 280px;
+    }
+
+    .meta{
+      display:flex;
+      justify-content: space-between;
+      align-items:center;
+      gap: 10px;
+      margin-top: 4px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: rgba(0,0,0,.16);
+      border: 1px solid rgba(255,255,255,.10);
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .meta span{
+      overflow:hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 60%;
+    }
+
+    .history-head{
+      display:flex; justify-content: space-between; align-items:center;
+      gap:10px; margin: 16px 0 10px;
+    }
+    .history-head h2{ margin:0; font-size: 14px; letter-spacing:.2px; }
+
+    .list{
+      display:flex; flex-direction: column; gap: 10px;
+      max-height: 320px; overflow:auto; padding-right: 4px;
+    }
+
+    .item{
+      background: rgba(0,0,0,.18);
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 16px;
+      padding: 12px 12px;
+      display:flex; gap:10px; align-items:center;
+    }
+    .item .text{ flex: 1; min-width: 0; cursor:pointer; }
+    .item .text .t{
+      font-size: 13px; color: var(--text);
+      overflow:hidden; text-overflow: ellipsis; white-space: nowrap;
+      margin-bottom: 4px;
+    }
+    .item .text .d{
+      font-size: 11px; color: var(--muted2);
+      overflow:hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+
+    .item .actions{ display:flex; gap:8px; align-items:center; }
+
+    .iconbtn{
+      width: 38px; height: 38px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.08);
+      color: var(--text);
+      cursor:pointer;
+      display:flex; align-items:center; justify-content:center;
+      transition: filter .12s ease;
+      user-select:none;
+    }
+    .iconbtn:hover{ filter: brightness(1.1); }
+    .iconbtn.danger{
+      border-color: rgba(255,77,109,.25);
+      background: rgba(255,77,109,.16);
+      color: #ffd6de;
+    }
+
+    .toast{
+      position: fixed;
+      left: 50%;
+      bottom: 18px;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,.70);
+      border: 1px solid rgba(255,255,255,.14);
+      color: rgba(255,255,255,.92);
+      padding: 10px 12px;
+      border-radius: 14px;
+      box-shadow: 0 20px 50px rgba(0,0,0,.45);
+      font-size: 13px;
+      opacity: 0;
+      pointer-events:none;
+      transition: opacity .18s ease, transform .18s ease;
+      backdrop-filter: blur(10px);
+    }
+    .toast.show{ opacity: 1; transform: translateX(-50%) translateY(-4px); }
+
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.12);
+      font-size: 12px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .list::-webkit-scrollbar{ width: 8px; }
+    .list::-webkit-scrollbar-thumb{ background: rgba(255,255,255,.12); border-radius: 20px; }
+  
+    
+    /* ---------- Footer (sticky + glow + subtle hover) ---------- */
+    .site-footer{
+      width: 100%;
+      margin-top: auto; /* pushes footer to bottom when page is short */
+      padding: 18px 14px 22px;
+      border-top: 1px solid rgba(255,255,255,.10);
+      background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(0,0,0,.28));
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      position: relative;
+    }
+
+    /* thin separator glow */
+    .site-footer::before{
+      content:"";
+      position:absolute;
+      left: 0; right: 0; top: 0;
+      height: 2px;
+      background: linear-gradient(90deg,
+        rgba(67,195,255,0),
+        rgba(67,195,255,.35),
+        rgba(34,197,94,.28),
+        rgba(255,77,109,.22),
+        rgba(67,195,255,0)
+      );
+      filter: blur(.25px);
+      opacity: .85;
+      pointer-events:none;
+    }
+
+    .footer-inner{
+      width: min(1180px, 100%);
+      margin: 0 auto;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .footer-links{
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .footer-links a{
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.14);
+      color: rgba(255,255,255,.92);
+      font-size: 13px;
+      font-weight: 650;
+      text-decoration: none;
+      user-select: none;
+
+      transition:
+        transform .14s ease,
+        filter .14s ease,
+        box-shadow .14s ease,
+        border-color .14s ease,
+        background .14s ease;
+    }
+
+    /* subtle, academic-friendly hover */
+    .footer-links a:hover{
+      transform: translateY(-1px);
+      filter: brightness(1.08);
+      border-color: rgba(67,195,255,.22);
+      box-shadow: 0 10px 24px rgba(0,0,0,.28);
+      background: rgba(255,255,255,.10);
+    }
+
+    .footer-links a:active{
+      transform: translateY(0px);
+    }
+
+    .footer-links .ico{
+      width: 18px;
+      height: 18px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .footer-links svg{
+      width: 18px;
+      height: 18px;
+      fill: rgba(255,255,255,.92);
+      opacity: .95;
+      transition: transform .14s ease, opacity .14s ease;
+    }
+
+    .footer-links a:hover svg{
+      transform: translateY(-.25px);
+      opacity: 1;
+    }
+
+    .footer-text{
+      font-size: 12px;
+      color: rgba(255,255,255,.65);
+      line-height: 1.4;
+    }
+
+    /* ---------- Organization helpers ---------- */
+    .field-span2{ grid-column: 1 / -1; }
+    .hint.small{ margin-top: 8px; font-size: 11px; color: var(--muted2); }
+
+    /* ---------- Frame controls ---------- */
+    .frame-controls{
+      display:grid;
+      grid-template-columns: 170px 1fr 1fr;
+      gap:10px;
+      align-items:center;
+    }
+    @media (max-width:760px){
+      .frame-controls{ grid-template-columns: 1fr; }
+    }
+    .check{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      font-size: 13px;
+      color: rgba(255,255,255,.88);
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: rgba(0,0,0,.12);
+      border: 1px solid rgba(255,255,255,.10);
+      user-select:none;
+      width: fit-content;
+    }
+    .check input{ width: 18px; height: 18px; }
+    .mini-color{ display:flex; align-items:center; gap:10px; }
+    .mini-color input[type="color"]{ width:52px; height:44px; }
+
+    /* ---------- Frame rendering (preview) ---------- */
+    .frame-wrap{
+      position: relative;
+      z-index: 1;
+      display:flex;
+      flex-direction: column;
+      align-items:center;
+      justify-content:center;
+      gap: 12px;
+      padding: 18px 18px 16px;
+      border-radius: 22px;
+      box-shadow: 0 18px 50px rgba(0,0,0,.35);
+    }
+    .frame-wrap #qrMount{
+      display:block;
+      border-radius: 16px;
+      overflow:hidden;
+      background: transparent;   /* remove white box #ffffff;*/
+      padding: 0;                /* remove border thickness 10px;*/
+      box-shadow: 0 10px 30px rgba(0,0,0,.22);
+    }
+    .frame-label{
+      font-weight: 800;
+      letter-spacing: .08em;
+      font-size: 20px;
+      color: #ffffff;
+      line-height: 1;
+      padding: 6px 10px 2px;
+      user-select:none;
+    }
+    .frame-simple{
+      background: transparent !important;
+      border: 2px solid rgba(255,255,255,.18);
+      box-shadow: 0 18px 50px rgba(0,0,0,.30);
+    }
+    .frame-simple .frame-label{ display:none; }
+    .frame-pill .frame-label{
+      font-size: 15px;
+      padding: 10px 16px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.16);
+      letter-spacing: .06em;
+    }
+
+  
+    
+    /* ---------- Theme Toggle (iOS-style + sun/moon) ---------- */
+    .theme-toggle{
+      margin-left: auto;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.18);
+      box-shadow: 0 18px 50px rgba(0,0,0,.30);
+      user-select:none;
+      flex: 0 0 auto;
+    }
+    .theme-label{
+      font-size: 12px;
+      font-weight: 750;
+      color: rgba(255,255,255,.78);
+      letter-spacing: .02em;
+      width: 46px;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    /* switch */
+    .switch{ position: relative; display: inline-block; width: 50px; height: 28px; flex: 0 0 auto; }
+    .switch input{ display:none; }
+    .slider{
+      position:absolute; inset:0;
+      cursor:pointer;
+      background: rgba(255,255,255,.10);
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 999px;
+      transition: background .22s ease, border-color .22s ease, filter .22s ease;
+    }
+
+    /* knob */
+    .slider:before{
+      content:"";
+      position:absolute;
+      width:22px; height:22px;
+
+      /* Dark (default) knob on RIGHT */
+      right: 3px;
+      left: auto;
+
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255,255,255,.92) url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2024%2024%22%20fill=%22none%22%3E%3Cpath%20d=%22M21%2014.5A8.5%208.5%200%200%201%209.5%203c.15%200%20.3%200%20.45.01A7%207%200%201%200%2021%2014.5Z%22%20fill=%22white%22%20opacity=%220.95%22/%3E%3C/svg%3E") center/14px 14px no-repeat;
+      border: 1px solid rgba(255,255,255,.18);
+      box-shadow: 0 10px 26px rgba(0,0,0,.35);
+      border-radius: 999px;
+
+      /* iOS-ish elastic */
+      transition: transform .45s cubic-bezier(.34,1.56,.64,1),
+                  background-color .22s ease,
+                  box-shadow .22s ease,
+                  border-color .22s ease,
+                  filter .22s ease;
+    }
+
+    /* Light (checked): knob goes LEFT + sun icon */
+    .switch input:checked + .slider{
+      background: rgba(37,99,235,.22);
+      border-color: rgba(37,99,235,.28);
+    }
+    .switch input:checked + .slider:before{
+      transform: translateY(-50%) translateX(-20px);
+      background: #ffffff url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2024%2024%22%20fill=%22none%22%3E%3Ccircle%20cx=%2212%22%20cy=%2212%22%20r=%224.2%22%20fill=%22%25230f172a%22%20opacity=%220.9%22/%3E%3Cpath%20d=%22M12%202.2v2.2M12%2019.6v2.2M21.8%2012h-2.2M4.4%2012H2.2M18.6%205.4l-1.55%201.55M6.95%2017.05%205.4%2018.6M18.6%2018.6l-1.55-1.55M6.95%206.95%205.4%205.4%22stroke=%22%25230f172a%22%20stroke-width=%221.8%22%20stroke-linecap=%22round%22%20opacity=%220.9%22/%3E%3C/svg%3E") center/14px 14px no-repeat;
+      border-color: rgba(15,23,42,.10);
+      box-shadow: 0 10px 22px rgba(15,23,42,.12);
+    }
+
+    /* subtle press feel */
+    .switch:active .slider:before{
+      transform: translateY(-50%) scale(.96);
+    }
+    .switch input:checked:active + .slider:before{
+      transform: translateY(-50%) translateX(-20px) scale(.96);
+    }
+
+    /* =========================
+       LIGHT THEME OVERRIDES
+       Dark theme is your original file (default).
+       Enabled via: body.light
+       ========================= */
+    body.light{
+      --bg1:#f6f8ff; --bg2:#eef2ff;
+      --card: rgba(255,255,255,.78);
+      --card2: rgba(255,255,255,.70);
+      --border: rgba(15,23,42,.12);
+      --text: rgba(15,23,42,.92);
+      --muted: rgba(15,23,42,.70);
+      --muted2: rgba(15,23,42,.55);
+      --accent:#2563eb; --accent2:#16a34a; --danger:#e11d48;
+      --shadow: 0 20px 60px rgba(15,23,42,.12);
+    }
+    body.light{
+      background:
+        radial-gradient(1200px 600px at 15% 10%, rgba(37,99,235,.14), transparent 60%),
+        radial-gradient(900px 500px at 80% 20%, rgba(22,163,74,.10), transparent 55%),
+        radial-gradient(900px 600px at 40% 90%, rgba(225,29,72,.08), transparent 60%),
+        linear-gradient(135deg, var(--bg1), var(--bg2));
+    }
+    body.light .header{
+      border-bottom: 1px solid rgba(15,23,42,.08);
+      background: linear-gradient(180deg, rgba(255,255,255,.85), rgba(255,255,255,.55));
+    }
+    body.light input, body.light select{
+      background: rgba(255,255,255,.88);
+      border: 1px solid rgba(15,23,42,.14);
+      color: var(--text);
+    }
+    body.light input::placeholder{ color: rgba(15,23,42,.45); }
+    body.light .field{ background: rgba(255,255,255,.72); border: 1px solid rgba(15,23,42,.10); }
+    body.light .meta{ background: rgba(255,255,255,.72); border: 1px solid rgba(15,23,42,.10); color: rgba(15,23,42,.70); }
+    body.light .qr-card{ background: rgba(255,255,255,.72); border: 1px solid rgba(15,23,42,.10); }
+    body.light .emptyState{ color: rgba(15,23,42,.62); }
+
+    body.light .btn-secondary{ background: rgba(15,23,42,.06); border: 1px solid rgba(15,23,42,.12); color: var(--text); }
+    body.light .btn-danger{ background: rgba(225,29,72,.10); border: 1px solid rgba(225,29,72,.18); color: rgba(136,19,55,.92); }
+    body.light .pill{ background: rgba(15,23,42,.06); border: 1px solid rgba(15,23,42,.12); color: rgba(15,23,42,.70); }
+    body.light .item{ background: rgba(255,255,255,.78); border: 1px solid rgba(15,23,42,.10); }
+    body.light .iconbtn{ background: rgba(15,23,42,.06); border: 1px solid rgba(15,23,42,.12); color: rgba(15,23,42,.90); }
+    body.light .check{ background: rgba(15,23,42,.04); border: 1px solid rgba(15,23,42,.10); color: rgba(15,23,42,.88); }
+    body.light .site-footer{ border-top: 1px solid rgba(15,23,42,.10); background: linear-gradient(180deg, rgba(255,255,255,.55), rgba(15,23,42,.04)); }
+    body.light .footer-links a{ background: rgba(255,255,255,.72); border: 1px solid rgba(15,23,42,.12); color: rgba(15,23,42,.90); }
+    body.light .footer-links svg{ fill: rgba(15,23,42,.90); }
+    body.light .footer-text{ color: rgba(15,23,42,.62); }
+
+    body.light .theme-toggle{
+      border: 1px solid rgba(15,23,42,.12);
+      background: rgba(255,255,255,.72);
+      box-shadow: 0 10px 22px rgba(15,23,42,.08);
+    }
+    body.light .theme-label{ color: rgba(15,23,42,.78); }
+    body.light .slider{ background: rgba(15,23,42,.10); border-color: rgba(15,23,42,.12); }
+
+  
+    body.light #eccAutoBadge{
+      color: rgba(15,23,42,.85) !important;
+      background: rgba(22,163,74,.14) !important;
+      border-color: rgba(22,163,74,.22) !important;
+    }
+
+  
+    /* ---------- Logo size slider (pro) ---------- */
+    .logo-box{
+      background: rgba(0,0,0,.14);
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 16px;
+      padding: 12px 12px 10px;
+    }
+    .logo-top{
+      display:flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 10px;
+      font-size: 12px;
+      color: var(--muted2);
+      margin-bottom: 10px;
+    }
+    .logo-top b{ color: var(--text); font-weight: 800; }
+    .logo-row{
+      display:flex;
+      align-items:center;
+      gap: 12px;
+    }
+    .logo-range{
+      flex: 1;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.18); /* will be overwritten by JS fill gradient */
+      outline: none;
+      cursor: pointer;
+    }
+    .logo-range::-webkit-slider-runnable-track{
+      height: 8px;
+      border-radius: 999px;
+      background: transparent;
+    }
+    .logo-range::-webkit-slider-thumb{
+      -webkit-appearance: none;
+      appearance:none;
+      width: 20px;
+      height: 20px;
+      border-radius: 999px;
+      background: #ffffff;
+      border: 3px solid rgba(67,195,255,.85);
+      box-shadow: 0 10px 22px rgba(0,0,0,.22);
+      margin-top: -6px; /* centers thumb on 8px track */
+    }
+    .logo-range::-moz-range-track{
+      height: 8px;
+      border-radius: 999px;
+      background: transparent;
+    }
+    .logo-range::-moz-range-progress{
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(67,195,255,.85);
+    }
+    .logo-range::-moz-range-thumb{
+      width: 20px;
+      height: 20px;
+      border-radius: 999px;
+      background: #ffffff;
+      border: 3px solid rgba(67,195,255,.85);
+      box-shadow: 0 10px 22px rgba(0,0,0,.22);
+    }
+    .logo-pill{
+      min-width: 74px;
+      text-align: center;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: rgba(255,255,255,.10);
+      border: 1px solid rgba(255,255,255,.14);
+      color: var(--text);
+      font-weight: 800;
+    }
+    .logo-tip{
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+    .logo-warn{
+      margin-top: 8px;
+      font-size: 12px;
+      color: #ffd6de;
+      display:none;
+    }
+    body.light .logo-box{
+      background: rgba(255,255,255,.72);
+      border: 1px solid rgba(15,23,42,.10);
+    }
+    body.light .logo-pill{
+      background: rgba(15,23,42,.06);
+      border: 1px solid rgba(15,23,42,.12);
+      color: rgba(15,23,42,.92);
+    }
+    body.light .logo-range{
+      background: rgba(15,23,42,.14);
+    }
+    
+    body.light .logo-range::-webkit-slider-thumb{ border-color: rgba(37,99,235,.85); }
+    body.light .logo-range::-moz-range-progress{ background: rgba(37,99,235,.85); }
+    body.light .logo-range::-moz-range-thumb{ border-color: rgba(37,99,235,.85); }
+
+    body.light .logo-warn{
+      color: rgba(136,19,55,.92);
+    }
+
+  
+/* === Classic Minimal Slider Override === */
+.logo-range{
+  -webkit-appearance: none;
+  width: 100%;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(15,23,42,.25);
+  outline: none;
+  cursor: pointer;
+}
+
+.logo-range::-webkit-slider-thumb{
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: none;
+  box-shadow: 0 1px 3px rgba(0,0,0,.25);
+  margin-top: -6px;
+}
+
+.logo-range::-moz-range-thumb{
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: none;
+  box-shadow: 0 1px 3px rgba(0,0,0,.25);
+}
+
+
+/* === Fix: Developer link visibility across themes === */
+.dev-link{
+  color: var(--text);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.dev-link:hover{
+  color: var(--accent);
+}
+
+</style>
+</head>
+
+<body>
+  <div class="wrap">
+
+    <!-- LEFT -->
+    <section class="panel">
+      <div class="header">
+         <img class="avatar" id="profilePic" src="https://i1.rgstatic.net/ii/profile.image/11431281222331997-1707176777369_Q512/Md-Minul-Alam.jpg" alt="Profile"/>
+        <div class="title">
+          <h1 id="profileName">Smart QR Code Generator</h1>
+	  <p>Developed by <a href="https://sites.google.com/view/mdminulalam/home" class="dev-link" target="_blank">Md Minul Alam</a></p>
+          <p>QR Code Dashboard • Styled QR • Download • History</p>
+        </div>
+      
+        <div class="theme-toggle" title="Toggle theme">
+          <span class="theme-label" id="themeLabel">Dark</span>
+          <label class="switch" aria-label="Theme toggle">
+            <input type="checkbox" id="themeToggle">
+            <span class="slider"></span>
+          </label>
+        </div>
+</div>
+
+      <div class="content">
+        <div class="label">
+          <span>Enter any text / URL</span>
+          <span id="countInfo">0 saved</span>
+        </div>
+
+        <input id="text" placeholder="Type or paste a URL / Text" />
+
+        <div class="tools">
+          <button class="btn btn-primary" onclick="generateClassic()">⚡ Generate</button>
+          <button class="btn btn-secondary" onclick="saveCurrent()">💾 Save to History</button>
+          <button class="btn btn-secondary" onclick="resetAll()">↺ Reset</button>
+        </div>
+
+        <!-- OPTIONS -->
+        <div class="grid">
+          <div class="field">
+            <div class="k">Preset style</div>
+            <select id="preset">
+              <option value="classic" selected>Classic (Black/White)</option>
+              <option value="neon">Neon</option>
+              <option value="minimal">Minimal</option>
+              <option value="invert">Inverted</option>
+              <option value="sunset">Sunset Gradient</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <div class="k">Logo (optional URL)</div>
+            <input id="logoUrl" placeholder="https://.../logo.png (optional)" />
+          </div>
+
+          <!-- Logo size (professional) -->
+          <div class="field field-span2" id="logoBoxWrap" style="display:none;">
+            <div class="logo-box">
+              <div class="logo-top">
+                <span>Logo size (recommended ≤ <b>22%</b> for best scanning)</span>
+                <span class="logo-pill" id="logoPctPill">22%</span>
+              </div>
+
+              <div class="logo-row">
+                <input class="logo-range" type="range" id="logoPct" min="8" max="30" step="1" value="22" />
+              </div>
+
+              <div class="logo-tip">Tip: When a logo is used, ECC automatically switches to <b>H</b> (30%).</div>
+              <div class="logo-warn" id="logoWarn"></div>
+            </div>
+          </div>
+
+
+          <div class="field">
+            <div class="k">Dots shape</div>
+            <select id="dotType">
+              <option value="square" selected>Square</option>
+              <option value="rounded">Rounded</option>
+              <option value="dots">Dots</option>
+              <option value="classy">Classy</option>
+              <option value="classy-rounded">Classy Rounded</option>
+              <option value="extra-rounded">Extra Rounded</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <div class="k">Corner squares</div>
+            <select id="cornerSquareType">
+              <option value="square" selected>Square</option>
+              <option value="extra-rounded">Extra Rounded</option>
+              <option value="dot">Dot</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <div class="k">Corner dots</div>
+            <select id="cornerDotType">
+              <option value="square" selected>Square</option>
+              <option value="dot">Dot</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <div class="k">Error correction <span id="eccAutoBadge" style="display:none; margin-left:8px; font-size:11px; font-weight:700; padding:3px 8px; border-radius:999px; background: rgba(34,197,94,.16); border: 1px solid rgba(34,197,94,.22); color: rgba(255,255,255,.88);">AUTO</span></div>
+            <select id="ecc">
+              <option value="L">L (7%)</option>
+              <option value="M">M (15%)</option>
+              <option value="Q" selected>Q (25%)</option>
+              <option value="H">H (30%)</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <div class="k">Foreground</div>
+            <div class="color-row">
+              <input type="color" id="fg" value="#000000"/>
+              <input id="fgHex" value="#000000"/>
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="k">Background</div>
+            <div class="color-row">
+              <input type="color" id="bg" value="#ffffff"/>
+              <input id="bgHex" value="#ffffff"/>
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="k">Size (px)</div>
+            <select id="size">
+              <option value="220">220</option>
+              <option value="280">280</option>
+              <option value="320" selected>320</option>
+              <option value="360">360</option>
+              <option value="420">420</option>
+              <option value="520">520</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <div class="k">Margin</div>
+            <select id="margin">
+              <option value="0">0</option>
+              <option value="4" selected>4</option>
+              <option value="8">8</option>
+              <option value="12">12</option>
+              <option value="16">16</option>
+            </select>
+          </div>
+          <div class="field field-span2">
+            <div class="k">Frame</div>
+            <div class="frame-controls">
+              <label class="check">
+                <input type="checkbox" id="frameEnable" />
+                <span>Enable frame</span>
+              </label>
+
+              <select id="frameStyle" title="Frame style">
+                <option value="scan" selected>Scan Me</option>
+                <option value="simple">Simple border</option>
+                <option value="pill">Pill label</option>
+                <option value="none">No frame</option>
+              </select>
+
+              <input id="frameText" placeholder="Frame text (e.g., SCAN ME)" value="SCAN ME" />
+
+              <div class="mini-color">
+                <input type="color" id="frameColor" value="#790c0c"/>
+                <input id="frameColorHex" value="#790c0c"/>
+              </div>
+
+              <select id="frameFont" title="Frame font">
+                <option value="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial" selected>Sans-Serif</option>
+                <option value="ui-serif, Georgia, 'Times New Roman', Times, serif">Serif</option>
+                <option value="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace">Monospace</option>
+              </select>
+            </div>
+
+            <div class="hint small">
+              Tip: Frame is included in <b>Download</b> when enabled.
+            </div>
+          </div>
+
+        </div>
+
+        <div class="hint">
+          ✅ Default preview is empty. Click <b>Generate</b> to create Classic QR first. <br/>
+          After generation, any style/color/shape changes update instantly.
+        </div>
+
+        <div class="history-head">
+          <h2>History</h2>
+          <div style="display:flex; gap:10px; align-items:center;">
+            <span class="pill" id="stylePill">Not generated yet</span>
+            <button class="btn btn-danger" onclick="clearHistory()">Clear</button>
+          </div>
+        </div>
+
+        <div class="list" id="history"></div>
+      </div>
+    </section>
+
+    <!-- RIGHT -->
+    <aside class="panel">
+      <div class="header">
+        <div class="title">
+          <h1>Preview</h1>
+          <p>Scan it with your phone camera</p>
+        </div>
+      </div>
+
+      <div class="preview">
+        <div class="qr-card">
+          <div id="emptyPreview" class="emptyState">
+            No QR yet.<br/>
+            Paste/type text and click <b>Generate</b>.
+          </div>
+          <div id="frameWrap" class="frame-wrap frame-scan" style="display:none;">
+            <div id="qrMount"></div>
+            <div id="frameLabel" class="frame-label">SCAN ME</div>
+          </div>
+        </div>
+
+        <div class="meta">
+          <span id="metaText">Waiting for generation…</span>
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-success" style="padding:10px 12px; border-radius:12px;" onclick="downloadPng()">⬇ Download</button>
+            <button class="btn btn-secondary" style="padding:10px 12px; border-radius:12px;" onclick="copyText()">🔗 Copy Text</button>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+  </div>
+
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+
+      <div class="footer-links">
+        <a href="https://scholar.google.com/citations?user=Kbt7bTYAAAAJ&hl=en" target="_blank" aria-label="Google Scholar">
+          <span class="ico" aria-hidden="true">
+            <!-- Google Scholar (mortarboard) -->
+            <svg viewBox="0 0 24 24" role="img" focusable="false">
+              <path d="M12 3 1 9l11 6 9-4.91V17h2V9L12 3zm0 10.18L5.16 9 12 5.82 18.84 9 12 13.18z"/>
+              <path d="M6 12.5v4.1c0 1.66 2.69 3.4 6 3.4s6-1.74 6-3.4v-4.1l-6 3.27-6-3.27z"/>
+            </svg>
+          </span>
+          <span>Google Scholar</span>
+        </a>
+
+        <a href="https://www.researchgate.net/profile/Md-Minul-Alam" target="_blank" aria-label="ResearchGate">
+          <span class="ico" aria-hidden="true">
+            <!-- ResearchGate (RG) -->
+            <svg viewBox="0 0 24 24" role="img" focusable="false">
+              <path d="M4 4h6.3c2.63 0 4.2 1.43 4.2 3.78 0 1.66-.73 2.86-2.02 3.43L15.9 20h-3.1l-3-7.9H7v7.9H4V4zm3 2.6v3.9h3.1c1.15 0 1.82-.7 1.82-1.95S11.25 6.6 10.1 6.6H7z"/>
+              <path d="M16.5 4H20v16h-3.5V4z"/>
+            </svg>
+          </span>
+          <span>ResearchGate</span>
+        </a>
+
+        <a href="https://www.linkedin.com/in/md-minul-alam/" target="_blank" aria-label="LinkedIn">
+          <span class="ico" aria-hidden="true">
+            <!-- LinkedIn -->
+            <svg viewBox="0 0 24 24" role="img" focusable="false">
+              <path d="M4.98 3.5C4.98 4.88 3.87 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1 4.98 2.12 4.98 3.5zM0.5 23.5h4V7.98h-4V23.5zM8 7.98h3.83v2.12h.05c.53-1 1.83-2.12 3.77-2.12 4.03 0 4.78 2.65 4.78 6.1v9.42h-4v-8.36c0-1.99-.04-4.55-2.77-4.55-2.77 0-3.19 2.17-3.19 4.41v8.5H8V7.98z"/>
+            </svg>
+          </span>
+          <span>LinkedIn</span>
+        </a>
+      </div>
+
+      <div class="footer-text">
+        © <span id="year"></span> Md Minul Alam. All rights reserved.<br />
+        This is a client-side tool. No data is collected, stored, or transmitted.
+      </div>
+
+    </div>
+  </footer>
+
+
+  <div class="toast" id="toast">Done</div>
+
+<script>
+  const LS_KEY = "qrHistory_qrstyling_v2";
+  const el = (id)=>document.getElementById(id);
+
+  // =========================
+  // Smart ECC (pro behavior)
+  // - Default ECC: Q (25%)
+  // - If logo is present: auto-bump to H (30%)
+  // - When logo removed: restore last user-chosen ECC (baseECC)
+  // =========================
+  let baseECC = "Q";  // remembers user's preferred ECC when no logo
+
+  function hasLogo(){
+    return ((el("logoUrl")?.value || "").trim().length > 0);
+  }
+
+  function autoSetECC(){
+    const badge = el("eccAutoBadge");
+    const eccEl = el("ecc");
+    if(!eccEl) return;
+
+    // show AUTO badge + lock dropdown when logo forces ECC
+    const logoOn = hasLogo();
+    showHideLogoBox();
+    // keep slider fill synced
+    updateLogoPctUI();
+    showHideLogoBox();
+    if(badge) badge.style.display = logoOn ? "inline-flex" : "none";
+    eccEl.disabled = logoOn;
+
+    // Remember user's choice only when there's no logo
+    if(!hasLogo()){
+      baseECC = eccEl.value || baseECC || "Q";
+    }
+
+    const want = hasLogo() ? "H" : (baseECC || "Q");
+
+    if(eccEl.value !== want){
+      eccEl.value = want;
+      // keep this subtle (no popups)
+      try{ if(logoOn) toast("ECC → H (logo)"); }catch(e){}
+    }
+  }
+
+  // Simple safety hint: if content is very long, suggest shortening if scan fails.
+  function warnIfDenseData(data, ecc){
+    const s = (data || "").trim();
+    if(!s) return;
+    const isVeryLong = s.length >= 220;  // heuristic
+    if(isVeryLong && (ecc === "H")){
+      try{ toast("Tip: very long data — shorten URL if scanning fails"); }catch(e){}
+    }
+  }
+
+  function setRangeFill(rangeEl){
+    if(!rangeEl) return;
+    const min = Number(rangeEl.min || 0);
+    const max = Number(rangeEl.max || 100);
+    const val = Number(rangeEl.value || 0);
+    const pct = ((val - min) * 100) / (max - min);
+
+    // Use theme accent for fill
+    const fill = getComputedStyle(document.body).getPropertyValue("--accent").trim() || "#43c3ff";
+    const rest = "rgba(255,255,255,.22)";
+    const restLight = "rgba(15,23,42,.18)";
+    const isLight = document.body.classList.contains("light");
+    const restColor = isLight ? restLight : rest;
+
+    rangeEl.style.background = `linear-gradient(90deg, ${fill} ${pct}%, ${restColor} ${pct}%)`;
+  }
+
+  function showHideLogoBox(){
+    const wrap = el("logoBoxWrap");
+    if(!wrap) return;
+    wrap.style.display = hasLogo() ? "block" : "none";
+  }
+
+  function updateLogoPctUI(){
+    const r = el("logoPct");
+    const pill = el("logoPctPill");
+    if(!r || !pill) return;
+    pill.textContent = `${r.value}%`;
+    setRangeFill(r);
+  }
+
+  function warnIfLogoRisky(s){
+    const w = el("logoWarn");
+    if(!w) return;
+
+    if(!hasLogo()){
+      w.style.display = "none";
+      w.textContent = "";
+      return;
+    }
+
+    const ecc = s.ecc || "H";
+    const pct = Number(s.logoScalePercent || 22);
+
+    // Practical "safe" caps (approx) by ECC
+    const maxByECC = { L: 10, M: 14, Q: 18, H: 22 };
+    const cap = maxByECC[ecc] ?? 18;
+
+    if(pct > cap){
+      w.textContent = `Warning: ${pct}% logo is large for ECC ${ecc}. Keep ≤ ${cap}% for best scanning.`;
+      w.style.display = "block";
+    }else{
+      w.style.display = "none";
+      w.textContent = "";
+    }
+  }
+
+
+
+  
+
+  // --- helper: create a darker/lighter shade for gradient auto-adjust ---
+  function shadeColor(hex, percent) {
+    let r = parseInt(hex.substr(1,2),16);
+    let g = parseInt(hex.substr(3,2),16);
+    let b = parseInt(hex.substr(5,2),16);
+
+    r = Math.min(255, Math.max(0, r + (r * percent / 100)));
+    g = Math.min(255, Math.max(0, g + (g * percent / 100)));
+    b = Math.min(255, Math.max(0, b + (b * percent / 100)));
+
+    return "#" + [r,g,b].map(x => Math.round(x).toString(16).padStart(2,"0")).join("");
+  }
+// State flag: live updates only after first generate
+  let isGenerated = false;
+  let typingTimer = null;
+
+  // QR instance (created once)
+  const qr = new QRCodeStyling({
+    width: 320,
+    height: 320,
+    type: "canvas",
+    data: " ",
+    margin: 4,
+    qrOptions: { errorCorrectionLevel: "Q" },
+    backgroundOptions: { color: "#ffffff" },
+    dotsOptions: { type: "square", color: "#000000" },
+    cornersSquareOptions: { type: "square", color: "#000000" },
+    cornersDotOptions: { type: "square", color: "#000000" },
+    imageOptions: { crossOrigin: "anonymous", margin: 6, imageSize: 0.22 }
+  });
+
+  // mount once
+  qr.append(el("qrMount"));
+
+  // hide mount initially
+  el("frameWrap").style.display = "none";
+
+  function toast(msg){
+    const t = el("toast");
+    t.textContent = msg;
+    t.classList.add("show");
+    setTimeout(()=>t.classList.remove("show"), 1100);
+  }
+  function isValidHex(v){ return /^#([0-9a-fA-F]{6})$/.test(v); }
+
+  // presets: these should auto-set colors when user selects preset
+function applyPreset(name){
+  const presets = {
+    classic: { fg:"#000000", bg:"#ffffff", gradient:false },
+    neon:    { fg:"#43c3ff", bg:"#0b1226", gradient:false },
+    minimal: { fg:"#1f2937", bg:"#f8fafc", gradient:false },
+    invert:  { fg:"#ffffff", bg:"#000000", gradient:false },
+    sunset:  { fg:"#ff7a18", bg:"#0b1226", gradient:true, gradA:"#ff7a18", gradB:"#af002d" }
+  };
+
+  const p = presets[name] || presets.classic;
+
+  // ALWAYS reset gradient flag when preset changes
+  window.__useGradient = !!p.gradient;
+  window.__gradA = p.gradA || p.fg;
+  window.__gradB = p.gradB || p.fg;
+
+  // Update colors
+  el("fg").value = p.fg;
+  el("fgHex").value = p.fg;
+  el("bg").value = p.bg;
+  el("bgHex").value = p.bg;
+
+  // 🔴 Force re-render so gradient is not leaked
+  if (isGenerated) updateLive();
+}
+
+
+  function getState(){
+    const data = (el("text").value || "").trim();
+
+    // sync hex text to picker if valid
+    if(isValidHex(el("fgHex").value)) el("fg").value = el("fgHex").value;
+    if(isValidHex(el("bgHex").value)) el("bg").value = el("bgHex").value;
+
+    return {
+      data: data || " ",
+      fg: el("fg").value,
+      bg: el("bg").value,
+      size: parseInt(el("size").value, 10),
+      margin: parseInt(el("margin").value, 10),
+      ecc: el("ecc").value,
+      dotType: el("dotType").value,
+      cornerSquareType: el("cornerSquareType").value,
+      cornerDotType: el("cornerDotType").value,
+      logo: (el("logoUrl").value || "").trim(),
+      preset: el("preset").value,
+      useGradient: !!window.__useGradient,
+      gradA: window.__gradA || el("fg").value,
+      gradB: window.__gradB || el("fg").value,
+      frameEnabled: !!el("frameEnable").checked,
+      frameStyle: el("frameStyle").value,
+      frameText: (el("frameText").value || "SCAN ME").trim(),
+      frameColor: el("frameColor").value,
+      frameFont: el("frameFont").value,
+      logoScalePercent: parseInt(el("logoPct")?.value || "22", 10)
+    };
+  }
+
+
+  function updatePill(s){
+    const g = s.useGradient ? `gradient(${s.gradA}→${s.gradB})` : s.fg;
+    el("stylePill").textContent =
+      `${s.dotType} • ${s.cornerSquareType}/${s.cornerDotType} • fg ${g} • bg ${s.bg} • ${s.size}px • m${s.margin} • ECC ${s.ecc}`;
+  }
+
+  function updateMeta(s){
+    el("metaText").textContent = (s.data || "").trim() ? s.data : "Waiting for generation…";
+  }
+
+  function updateLive(){
+    if(!isGenerated) return; // prevent auto-updating before generation
+    autoSetECC();
+    updateLogoPctUI();
+
+    const s = getState();
+    const dotsOptions = s.useGradient
+  ? {
+      type: s.dotType,
+      color: undefined,          // IMPORTANT: clear plain color
+      gradient: {
+        type: "linear",
+        rotation: 0,
+        colorStops: [
+          { offset: 0, color: s.gradA },
+          { offset: 1, color: s.gradB }
+        ]
+      }
+    }
+  : {
+      type: s.dotType,
+      color: s.fg,               // set solid color
+      gradient: undefined        // IMPORTANT: clear old gradient
+    };
+
+qr.update({
+  width: s.size,
+  height: s.size,
+  data: s.data,
+  margin: s.margin,
+  qrOptions: { errorCorrectionLevel: s.ecc },
+  backgroundOptions: { color: s.bg }, //"transparent"
+
+  // ✅ this is the key fix
+  dotsOptions,
+
+  cornersSquareOptions: { type: s.cornerSquareType, color: s.fg },
+  cornersDotOptions: { type: s.cornerDotType, color: s.fg },
+  image: s.logo || undefined,
+  imageOptions: { crossOrigin: "anonymous", margin: 6, imageSize: (s.logoScalePercent||22)/100 }
+});
+
+    // Make the Margin control visually obvious:
+    // keep QR quiet-zone margin (qr.update margin) AND adjust the white card padding around the QR.
+    try{
+      const mount = el("qrMount");
+      if(mount) mount.style.padding = (10 + (s.margin||0)) + "px";
+    }catch(e){}
+
+
+
+    updatePill(s);
+    updateMeta(s);
+    warnIfDenseData(s.data, s.ecc);
+    warnIfLogoRisky(s);
+    window.__current = s;
+    updateFrame(s);
+  }
+
+  function debounceUpdate(){
+    if(!isGenerated) return;
+    clearTimeout(typingTimer);
+    typingTimer = setTimeout(updateLive, 150);
+  }
+
+  // --------- REQUIRED NEW BEHAVIOR ----------
+  // 1) Default empty preview
+  // 2) Click Generate => ALWAYS generate Classic black/white first
+  // 3) After that, changing style updates instantly
+  function generateClassic(){
+    const text = (el("text").value || "").trim();
+    if(!text) return alert("Paste/type a text or URL first.");
+
+    // Force Classic defaults for the FIRST generation
+    el("preset").value = "classic";
+    window.__useGradient = false;
+    el("fg").value = "#000000"; el("fgHex").value = "#000000";
+    el("bg").value = "#ffffff"; el("bgHex").value = "#ffffff";
+    el("dotType").value = "square";
+    el("cornerSquareType").value = "square";
+    el("cornerDotType").value = "square";
+    el("ecc").value = "Q";
+    baseECC = "Q";
+    el("size").value = "320";
+    el("margin").value = "4";
+    el("logoUrl").value = "";
+    if(el("logoPct")) el("logoPct").value = "22";
+    updateLogoPctUI();
+// Classic = no logo by default
+
+    // show qr area
+    el("emptyPreview").style.display = "none";
+    el("frameWrap").style.display = "flex";
+
+    // mark as generated and render
+    isGenerated = true;
+    updateLive();
+    toast("Generated (Classic)");
+  }
+
+  
+  function updateFrame(s){
+    const wrap = el("frameWrap");
+    const label = el("frameLabel");
+    if(!wrap || !label) return;
+
+    if(!isGenerated){
+      wrap.style.display = "none";
+      return;
+    }
+
+    const enabled = !!s.frameEnabled && s.frameStyle !== "none";
+    wrap.style.display = "flex";
+
+    // classes
+    wrap.classList.remove("frame-scan","frame-simple","frame-pill");
+    if(!enabled){
+      // No frame: show only QR card (no colored background, no label)
+      wrap.style.background = "transparent";
+      wrap.style.padding = "0";
+      wrap.style.boxShadow = "none";
+      wrap.style.border = "none";
+      label.style.display = "none";
+      wrap.classList.add("frame-scan");
+      return;
+    }
+
+    // enabled styles
+    if(s.frameStyle === "simple") wrap.classList.add("frame-simple");
+    else if(s.frameStyle === "pill") wrap.classList.add("frame-pill");
+    else wrap.classList.add("frame-scan");
+
+    
+    // style-specific visuals
+    wrap.style.border = "none";
+    if(s.frameStyle === "simple"){
+      // Simple border: no filled background, border uses chosen frame color
+      wrap.style.background = "transparent";
+      wrap.style.border = `2px solid ${s.frameColor || "#790c0c"}`;
+    }else{
+      // Filled frame styles
+      wrap.style.background = s.frameColor || "#790c0c";
+    }
+    label.style.fontFamily = s.frameFont || "";
+    label.textContent = (s.frameText || "SCAN ME").toUpperCase();
+    label.style.display = (s.frameStyle === "simple") ? "none" : "block";
+
+    // reset padding/shadow in case it was disabled previously
+    wrap.style.padding = "";
+    wrap.style.boxShadow = "";
+  }
+
+  async function exportWithFrame(){
+    const s = window.__current || getState();
+    const enabled = !!s.frameEnabled && s.frameStyle !== "none";
+    if(!enabled){
+      qr.download({ name: "qr", extension: "png" });
+      return;
+    }
+
+    const blob = await qr.getRawData("png");
+    const imgUrl = URL.createObjectURL(blob);
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+
+    await new Promise((resolve, reject)=>{
+      img.onload = resolve;
+      img.onerror = reject;
+      img.src = imgUrl;
+    });
+
+    const pad = (s.frameStyle === "simple") ? 18 : 26;
+    const labelH = (s.frameStyle === "simple") ? 0 : 78;
+
+    const qrW = img.width;
+    const qrH = img.height;
+
+    const outW = qrW + pad*2;
+    const outH = qrH + pad*2 + labelH;
+
+    const dpr = Math.max(1, window.devicePixelRatio || 1);
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.round(outW * dpr);
+    canvas.height = Math.round(outH * dpr);
+    const ctx = canvas.getContext("2d");
+    ctx.scale(dpr, dpr);
+
+    function roundRect(x, y, w, h, r){
+      const rr = Math.min(r, w/2, h/2);
+      ctx.beginPath();
+      ctx.moveTo(x+rr, y);
+      ctx.arcTo(x+w, y, x+w, y+h, rr);
+      ctx.arcTo(x+w, y+h, x, y+h, rr);
+      ctx.arcTo(x, y+h, x, y, rr);
+      ctx.arcTo(x, y, x+w, y, rr);
+      ctx.closePath();
+    }
+
+    // Frame background (rounded)
+    ctx.save();
+    roundRect(0, 0, outW, outH, 24);
+    ctx.clip();
+    ctx.fillStyle = s.frameColor || "#790c0c";
+    ctx.fillRect(0, 0, outW, outH);
+    ctx.restore();
+
+    // Inner white card
+    ctx.save();
+    roundRect(pad-6, pad-6, qrW+12, qrH+12, 18);
+    ctx.fillStyle = s.bg;   // use user background, not white "#ffffff";
+    ctx.fill();
+    ctx.restore();
+
+    // QR image
+    ctx.drawImage(img, pad, pad, qrW, qrH);
+
+    // Label
+    if(labelH > 0){
+      const text = (s.frameText || "SCAN ME").toUpperCase();
+      ctx.save();
+      ctx.fillStyle = "#ffffff";
+      ctx.font = `800 34px ${s.frameFont || "ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial"}`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(text, outW/2, outH - labelH/2 + 2);
+      ctx.restore();
+    }
+
+    URL.revokeObjectURL(imgUrl);
+
+    const a = document.createElement("a");
+    a.download = "qr.png";
+    a.href = canvas.toDataURL("image/png");
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
+
+// --------- download / copy ----------
+  function downloadPng(){
+    if(!isGenerated) return toast("Generate first");
+    const s = window.__current || getState();
+    if(s.frameEnabled && s.frameStyle !== "none"){
+      exportWithFrame().catch(()=>toast("Download failed"));
+    }else{
+      qr.download({ name: "qr", extension: "png" });
+    }
+  }
+  function copyText(){
+    const t = (el("text").value || "").trim();
+    if(!t) return toast("Nothing to copy");
+    navigator.clipboard.writeText(t).then(()=>toast("Copied")).catch(()=>toast("Copy blocked"));
+  }
+
+  // --------- history ----------
+  function loadHistory(){
+    try { return JSON.parse(localStorage.getItem(LS_KEY) || "[]"); }
+    catch(e){ return []; }
+  }
+  function saveHistoryArr(arr){ localStorage.setItem(LS_KEY, JSON.stringify(arr)); }
+  function escapeHtml(str){
+    return (str || "").replace(/[&<>"']/g, m => ({
+      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+    }[m]));
+  }
+  function jsEscape(str){
+    return (str || "").replace(/\\/g,"\\\\").replace(/'/g,"\\'").replace(/\n/g,"\\n").replace(/\r/g,"\\r");
+  }
+  function signature(s){
+    return [
+      s.data, s.size, s.margin, s.ecc,
+      s.dotType, s.cornerSquareType, s.cornerDotType,
+      s.fg, s.bg,
+      s.useGradient ? `G:${s.gradA}-${s.gradB}` : "G:NO",
+      s.logo || ""
+    ].join("||");
+  }
+
+  function saveCurrent(){
+    if(!isGenerated) return alert("Generate a QR first, then you can save it.");
+
+    const s = getState();
+    const text = (s.data || "").trim();
+    if(!text) return alert("Enter a text/URL first.");
+
+    let h = loadHistory();
+    const sig = signature(s);
+    h = h.filter(x => x.sig !== sig);
+    h.unshift({ sig, state: s, ts: new Date().toLocaleString() });
+    saveHistoryArr(h);
+    renderHistory();
+    toast("Saved");
+  }
+
+  function renderHistory(){
+    const box = el("history");
+    const h = loadHistory();
+    el("countInfo").textContent = `${h.length} saved`;
+
+    if(h.length === 0){
+      box.innerHTML = `<div style="color:rgba(255,255,255,.65); font-size:13px;">No history yet.</div>`;
+      return;
+    }
+
+    box.innerHTML = h.map((x, idx)=>{
+      const s = x.state || {};
+      const meta = `${s.dotType} • ${s.size}px • m${s.margin} • ECC ${s.ecc}`;
+      return `
+        <div class="item">
+          <div class="text" onclick="loadFromHistory(${idx})" title="Click to load">
+            <div class="t">${escapeHtml((s.data||"").trim())}</div>
+            <div class="d">${escapeHtml(x.ts || "")} • ${escapeHtml(meta)}</div>
+          </div>
+          <div class="actions">
+            <button class="iconbtn" title="Load" onclick="loadFromHistory(${idx}); event.stopPropagation();">👁</button>
+            <button class="iconbtn" title="Download" onclick="downloadHistory(${idx}); event.stopPropagation();">⬇</button>
+            <button class="iconbtn" title="Copy text" onclick="navigator.clipboard.writeText('${jsEscape((s.data||"").trim())}'); toast('Copied'); event.stopPropagation();">🔗</button>
+            <button class="iconbtn danger" title="Delete" onclick="deleteHistory(${idx}); event.stopPropagation();">🗑</button>
+          </div>
+        </div>
+      `;
+    }).join("");
+  }
+
+  function loadFromHistory(i){
+    const h = loadHistory();
+    const item = h[i];
+    if(!item) return;
+    const s = item.state;
+
+    el("text").value = (s.data || "").trim();
+    el("preset").value = s.preset || "classic";
+
+    window.__useGradient = !!s.useGradient;
+    window.__gradA = s.gradA || s.fg;
+    window.__gradB = s.gradB || s.fg;
+
+    el("dotType").value = s.dotType || "square";
+    el("cornerSquareType").value = s.cornerSquareType || "square";
+    el("cornerDotType").value = s.cornerDotType || "square";
+    el("ecc").value = s.ecc || "M";
+    el("size").value = String(s.size || 320);
+    el("margin").value = String(s.margin ?? 4);
+
+    el("fg").value = s.fg || "#000000"; el("fgHex").value = el("fg").value;
+    el("bg").value = s.bg || "#ffffff"; el("bgHex").value = el("bg").value;
+    el("logoUrl").value = s.logo || "";
+    if(el("logoPct")) el("logoPct").value = String(s.logoScalePercent ?? 22);
+    updateLogoPctUI();
+// frame restore
+    el("frameEnable").checked = !!s.frameEnabled;
+    el("frameStyle").value = s.frameStyle || "scan";
+    el("frameText").value = (s.frameText || "SCAN ME");
+    el("frameColor").value = s.frameColor || "#790c0c"; el("frameColorHex").value = el("frameColor").value;
+    el("frameFont").value = s.frameFont || "ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial";
+
+    // show preview and enable live
+    el("emptyPreview").style.display = "none";
+    el("frameWrap").style.display = "flex";
+    isGenerated = true;
+    updateLive();
+    toast("Loaded");
+  }
+
+  function downloadHistory(i){
+    const h = loadHistory();
+    const item = h[i];
+    if(!item) return;
+
+    const target = item.state;
+
+    qr.update({
+      width: target.size,
+      height: target.size,
+      data: target.data,
+      margin: target.margin,
+      qrOptions: { errorCorrectionLevel: target.ecc },
+      backgroundOptions: { color: target.bg  }, //"transparent"
+      dotsOptions: target.useGradient
+        ? { type: target.dotType, gradient: { type:"linear", rotation:0, colorStops:[{offset:0,color:target.gradA},{offset:1,color:target.gradB}] } }
+        : { type: target.dotType, color: target.fg },
+      cornersSquareOptions: { type: target.cornerSquareType, color: target.fg },
+      cornersDotOptions: { type: target.cornerDotType, color: target.fg },
+      image: target.logo || undefined,
+      imageOptions: { crossOrigin: "anonymous", margin: 6, imageSize: ((target.logoScalePercent||22)/100) }
+    });
+
+    // ensure visible
+    el("emptyPreview").style.display = "none";
+    el("frameWrap").style.display = "flex";
+
+    qr.download({ name: "qr", extension: "png" });
+
+    // if user hasn't generated yet, keep it visible after download
+    isGenerated = true;
+    setTimeout(()=>updateLive(), 150);
+  }
+
+  function deleteHistory(i){
+    let h = loadHistory();
+    h.splice(i, 1);
+    saveHistoryArr(h);
+    renderHistory();
+    toast("Deleted");
+  }
+
+  function clearHistory(){
+    if(!confirm("Clear all history?")) return;
+    localStorage.removeItem(LS_KEY);
+    renderHistory();
+    toast("Cleared");
+  }
+
+  // --------- reset ----------
+  function resetAll(){
+    el("text").value = "";
+    el("preset").value = "classic";
+    el("logoUrl").value = "";
+    el("dotType").value = "square";
+    el("cornerSquareType").value = "square";
+    el("cornerDotType").value = "square";
+    el("ecc").value = "Q";
+    baseECC = "Q";
+    el("size").value = "320";
+    el("margin").value = "4";
+    el("fg").value = "#000000"; el("fgHex").value = "#000000";
+    el("bg").value = "#ffffff"; el("bgHex").value = "#ffffff";
+    window.__useGradient = false;
+
+    // hide preview again
+    isGenerated = false;
+    el("frameWrap").style.display = "none";
+    el("emptyPreview").style.display = "block";
+    el("stylePill").textContent = "Not generated yet";
+    el("metaText").textContent = "Waiting for generation…";
+    toast("Reset");
+  }
+
+  // --------- Live update listeners (only effective AFTER generate) ----------
+  el("text").addEventListener("input", debounceUpdate);
+
+  ["dotType","cornerSquareType","cornerDotType","ecc","size","margin"].forEach(id=>{
+    el(id).addEventListener("change", ()=>{ if(id==="ecc" && !hasLogo()) baseECC = el("ecc").value || baseECC; updateLive(); });
+  });
+
+  el("logoUrl").addEventListener("input", ()=>{ autoSetECC(); debounceUpdate(); });
+
+  el("logoPct")?.addEventListener("input", ()=>{ updateLogoPctUI(); updateLive(); });
+el("fg").addEventListener("input", ()=>{
+    const v = el("fg").value;
+    el("fgHex").value = v;
+
+    // If a gradient preset is active (e.g., Sunset), let Foreground control the gradient too
+    if (window.__useGradient) {
+      window.__gradA = v;
+      window.__gradB = shadeColor(v, -35); // slightly darker end for contrast
+    }
+
+    updateLive();
+  });
+  el("bg").addEventListener("input", ()=>{ el("bgHex").value = el("bg").value; updateLive(); });
+
+  el("fgHex").addEventListener("input", ()=>{
+    if(isValidHex(el("fgHex").value)) {
+      const v = el("fgHex").value;
+      el("fg").value = v;
+
+      if (window.__useGradient) {
+        window.__gradA = v;
+        window.__gradB = shadeColor(v, -35);
+      }
+
+      updateLive();
+    }
+  });
+  el("bgHex").addEventListener("input", ()=>{ if(isValidHex(el("bgHex").value)) { el("bg").value = el("bgHex").value; updateLive(); } });
+
+  // preset changes should auto-change colors, and update only after generate
+  el("preset").addEventListener("change", ()=>applyPreset(el("preset").value));
+
+  
+  // frame listeners
+  el("frameEnable").addEventListener("change", updateLive);
+  el("frameStyle").addEventListener("change", updateLive);
+  el("frameText").addEventListener("input", debounceUpdate);
+  el("frameFont").addEventListener("change", updateLive);
+
+  el("frameColor").addEventListener("input", ()=>{
+    el("frameColorHex").value = el("frameColor").value;
+    updateLive();
+  });
+  el("frameColorHex").addEventListener("input", ()=>{
+    const v = el("frameColorHex").value;
+    if(isValidHex(v)){
+      el("frameColor").value = v;
+      updateLive();
+    }
+  });
+
+// init: empty by default
+  renderHistory();
+  resetAll(); // ensures empty preview + classic defaults in controls
+  showHideLogoBox();
+  updateLogoPctUI();
+
+
+  // --------- Theme Toggle (Dark = original design, Light = override) ----------
+  const THEME_KEY = "qr_theme_v3_exact";
+  function setTheme(mode){
+    const isLight = (mode === "light");
+    document.body.classList.toggle("light", isLight);
+    const t = el("themeToggle");
+    const label = el("themeLabel");
+    if(t) t.checked = isLight;
+    if(label) label.textContent = isLight ? "Light" : "Dark";
+    try{ localStorage.setItem(THEME_KEY, mode); }catch(e){}
+  }
+  function initTheme(){
+    let saved = null;
+    try{ saved = localStorage.getItem(THEME_KEY); }catch(e){}
+    if(saved === "light" || saved === "dark"){
+      setTheme(saved);
+      return;
+    }
+    const prefersLight = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches;
+    setTheme(prefersLight ? "light" : "dark");
+  }
+  // init toggle after DOM is ready
+  (function(){
+    initTheme();
+    const t = el("themeToggle");
+    if(t){
+      t.addEventListener("change", ()=> setTheme(t.checked ? "light" : "dark"));
+    }
+  })();
+
+</script>
+</body>
+</html>
