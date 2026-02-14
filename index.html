@@ -3,13 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Styled QR Code Generator • Md Minul Alam</title>
+  <title>Styled QR Code Generator</title>
 
   <!-- QR Styling Library (CDN) -->
-  <script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.6.0/lib/qr-code-styling.js">
+  <script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.6.0/lib/qr-code-styling.js"></script>
+<script>
   // footer year
-  try{ document.getElementById("year").textContent = new Date().getFullYear(); }catch(e){}
-
+  document.addEventListener("DOMContentLoaded", () => {
+    const y = document.getElementById("year");
+    if (y) y.textContent = new Date().getFullYear();
+  });
 </script>
 
   <style>
@@ -466,7 +469,307 @@
       letter-spacing: .06em;
     }
 
-  </style>
+  
+    
+    /* ---------- Theme Toggle (iOS-style + sun/moon) ---------- */
+    .theme-toggle{
+      margin-left: auto;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.18);
+      box-shadow: 0 18px 50px rgba(0,0,0,.30);
+      user-select:none;
+      flex: 0 0 auto;
+    }
+    .theme-label{
+      font-size: 12px;
+      font-weight: 750;
+      color: rgba(255,255,255,.78);
+      letter-spacing: .02em;
+      width: 46px;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    /* switch */
+    .switch{ position: relative; display: inline-block; width: 50px; height: 28px; flex: 0 0 auto; }
+    .switch input{ display:none; }
+    .slider{
+      position:absolute; inset:0;
+      cursor:pointer;
+      background: rgba(255,255,255,.10);
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 999px;
+      transition: background .22s ease, border-color .22s ease, filter .22s ease;
+    }
+
+    /* knob */
+    .slider:before{
+      content:"";
+      position:absolute;
+      width:22px; height:22px;
+
+      /* Dark (default) knob on RIGHT */
+      right: 3px;
+      left: auto;
+
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255,255,255,.92) url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2024%2024%22%20fill=%22none%22%3E%3Cpath%20d=%22M21%2014.5A8.5%208.5%200%200%201%209.5%203c.15%200%20.3%200%20.45.01A7%207%200%201%200%2021%2014.5Z%22%20fill=%22white%22%20opacity=%220.95%22/%3E%3C/svg%3E") center/14px 14px no-repeat;
+      border: 1px solid rgba(255,255,255,.18);
+      box-shadow: 0 10px 26px rgba(0,0,0,.35);
+      border-radius: 999px;
+
+      /* iOS-ish elastic */
+      transition: transform .45s cubic-bezier(.34,1.56,.64,1),
+                  background-color .22s ease,
+                  box-shadow .22s ease,
+                  border-color .22s ease,
+                  filter .22s ease;
+    }
+
+    /* Light (checked): knob goes LEFT + sun icon */
+    .switch input:checked + .slider{
+      background: rgba(37,99,235,.22);
+      border-color: rgba(37,99,235,.28);
+    }
+    .switch input:checked + .slider:before{
+      transform: translateY(-50%) translateX(-20px);
+      background: #ffffff url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2024%2024%22%20fill=%22none%22%3E%3Ccircle%20cx=%2212%22%20cy=%2212%22%20r=%224.2%22%20fill=%22%25230f172a%22%20opacity=%220.9%22/%3E%3Cpath%20d=%22M12%202.2v2.2M12%2019.6v2.2M21.8%2012h-2.2M4.4%2012H2.2M18.6%205.4l-1.55%201.55M6.95%2017.05%205.4%2018.6M18.6%2018.6l-1.55-1.55M6.95%206.95%205.4%205.4%22stroke=%22%25230f172a%22%20stroke-width=%221.8%22%20stroke-linecap=%22round%22%20opacity=%220.9%22/%3E%3C/svg%3E") center/14px 14px no-repeat;
+      border-color: rgba(15,23,42,.10);
+      box-shadow: 0 10px 22px rgba(15,23,42,.12);
+    }
+
+    /* subtle press feel */
+    .switch:active .slider:before{
+      transform: translateY(-50%) scale(.96);
+    }
+    .switch input:checked:active + .slider:before{
+      transform: translateY(-50%) translateX(-20px) scale(.96);
+    }
+
+    /* =========================
+       LIGHT THEME OVERRIDES
+       Dark theme is your original file (default).
+       Enabled via: body.light
+       ========================= */
+    body.light{
+      --bg1:#f6f8ff; --bg2:#eef2ff;
+      --card: rgba(255,255,255,.78);
+      --card2: rgba(255,255,255,.70);
+      --border: rgba(15,23,42,.12);
+      --text: rgba(15,23,42,.92);
+      --muted: rgba(15,23,42,.70);
+      --muted2: rgba(15,23,42,.55);
+      --accent:#2563eb; --accent2:#16a34a; --danger:#e11d48;
+      --shadow: 0 20px 60px rgba(15,23,42,.12);
+    }
+    body.light{
+      background:
+        radial-gradient(1200px 600px at 15% 10%, rgba(37,99,235,.14), transparent 60%),
+        radial-gradient(900px 500px at 80% 20%, rgba(22,163,74,.10), transparent 55%),
+        radial-gradient(900px 600px at 40% 90%, rgba(225,29,72,.08), transparent 60%),
+        linear-gradient(135deg, var(--bg1), var(--bg2));
+    }
+    body.light .header{
+      border-bottom: 1px solid rgba(15,23,42,.08);
+      background: linear-gradient(180deg, rgba(255,255,255,.85), rgba(255,255,255,.55));
+    }
+    body.light input, body.light select{
+      background: rgba(255,255,255,.88);
+      border: 1px solid rgba(15,23,42,.14);
+      color: var(--text);
+    }
+    body.light input::placeholder{ color: rgba(15,23,42,.45); }
+    body.light .field{ background: rgba(255,255,255,.72); border: 1px solid rgba(15,23,42,.10); }
+    body.light .meta{ background: rgba(255,255,255,.72); border: 1px solid rgba(15,23,42,.10); color: rgba(15,23,42,.70); }
+    body.light .qr-card{ background: rgba(255,255,255,.72); border: 1px solid rgba(15,23,42,.10); }
+    body.light .emptyState{ color: rgba(15,23,42,.62); }
+
+    body.light .btn-secondary{ background: rgba(15,23,42,.06); border: 1px solid rgba(15,23,42,.12); color: var(--text); }
+    body.light .btn-danger{ background: rgba(225,29,72,.10); border: 1px solid rgba(225,29,72,.18); color: rgba(136,19,55,.92); }
+    body.light .pill{ background: rgba(15,23,42,.06); border: 1px solid rgba(15,23,42,.12); color: rgba(15,23,42,.70); }
+    body.light .item{ background: rgba(255,255,255,.78); border: 1px solid rgba(15,23,42,.10); }
+    body.light .iconbtn{ background: rgba(15,23,42,.06); border: 1px solid rgba(15,23,42,.12); color: rgba(15,23,42,.90); }
+    body.light .check{ background: rgba(15,23,42,.04); border: 1px solid rgba(15,23,42,.10); color: rgba(15,23,42,.88); }
+    body.light .site-footer{ border-top: 1px solid rgba(15,23,42,.10); background: linear-gradient(180deg, rgba(255,255,255,.55), rgba(15,23,42,.04)); }
+    body.light .footer-links a{ background: rgba(255,255,255,.72); border: 1px solid rgba(15,23,42,.12); color: rgba(15,23,42,.90); }
+    body.light .footer-links svg{ fill: rgba(15,23,42,.90); }
+    body.light .footer-text{ color: rgba(15,23,42,.62); }
+
+    body.light .theme-toggle{
+      border: 1px solid rgba(15,23,42,.12);
+      background: rgba(255,255,255,.72);
+      box-shadow: 0 10px 22px rgba(15,23,42,.08);
+    }
+    body.light .theme-label{ color: rgba(15,23,42,.78); }
+    body.light .slider{ background: rgba(15,23,42,.10); border-color: rgba(15,23,42,.12); }
+
+  
+    body.light #eccAutoBadge{
+      color: rgba(15,23,42,.85) !important;
+      background: rgba(22,163,74,.14) !important;
+      border-color: rgba(22,163,74,.22) !important;
+    }
+
+  
+    /* ---------- Logo size slider (pro) ---------- */
+    .logo-box{
+      background: rgba(0,0,0,.14);
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 16px;
+      padding: 12px 12px 10px;
+    }
+    .logo-top{
+      display:flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 10px;
+      font-size: 12px;
+      color: var(--muted2);
+      margin-bottom: 10px;
+    }
+    .logo-top b{ color: var(--text); font-weight: 800; }
+    .logo-row{
+      display:flex;
+      align-items:center;
+      gap: 12px;
+    }
+    .logo-range{
+      flex: 1;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.18); /* will be overwritten by JS fill gradient */
+      outline: none;
+      cursor: pointer;
+    }
+    .logo-range::-webkit-slider-runnable-track{
+      height: 8px;
+      border-radius: 999px;
+      background: transparent;
+    }
+    .logo-range::-webkit-slider-thumb{
+      -webkit-appearance: none;
+      appearance:none;
+      width: 20px;
+      height: 20px;
+      border-radius: 999px;
+      background: #ffffff;
+      border: 3px solid rgba(67,195,255,.85);
+      box-shadow: 0 10px 22px rgba(0,0,0,.22);
+      margin-top: -6px; /* centers thumb on 8px track */
+    }
+    .logo-range::-moz-range-track{
+      height: 8px;
+      border-radius: 999px;
+      background: transparent;
+    }
+    .logo-range::-moz-range-progress{
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(67,195,255,.85);
+    }
+    .logo-range::-moz-range-thumb{
+      width: 20px;
+      height: 20px;
+      border-radius: 999px;
+      background: #ffffff;
+      border: 3px solid rgba(67,195,255,.85);
+      box-shadow: 0 10px 22px rgba(0,0,0,.22);
+    }
+    .logo-pill{
+      min-width: 74px;
+      text-align: center;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: rgba(255,255,255,.10);
+      border: 1px solid rgba(255,255,255,.14);
+      color: var(--text);
+      font-weight: 800;
+    }
+    .logo-tip{
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+    .logo-warn{
+      margin-top: 8px;
+      font-size: 12px;
+      color: #ffd6de;
+      display:none;
+    }
+    body.light .logo-box{
+      background: rgba(255,255,255,.72);
+      border: 1px solid rgba(15,23,42,.10);
+    }
+    body.light .logo-pill{
+      background: rgba(15,23,42,.06);
+      border: 1px solid rgba(15,23,42,.12);
+      color: rgba(15,23,42,.92);
+    }
+    body.light .logo-range{
+      background: rgba(15,23,42,.14);
+    }
+    
+    body.light .logo-range::-webkit-slider-thumb{ border-color: rgba(37,99,235,.85); }
+    body.light .logo-range::-moz-range-progress{ background: rgba(37,99,235,.85); }
+    body.light .logo-range::-moz-range-thumb{ border-color: rgba(37,99,235,.85); }
+
+    body.light .logo-warn{
+      color: rgba(136,19,55,.92);
+    }
+
+  
+/* === Classic Minimal Slider Override === */
+.logo-range{
+  -webkit-appearance: none;
+  width: 100%;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(15,23,42,.25);
+  outline: none;
+  cursor: pointer;
+}
+
+.logo-range::-webkit-slider-thumb{
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: none;
+  box-shadow: 0 1px 3px rgba(0,0,0,.25);
+  margin-top: -6px;
+}
+
+.logo-range::-moz-range-thumb{
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: none;
+  box-shadow: 0 1px 3px rgba(0,0,0,.25);
+}
+
+
+/* === Fix: Developer link visibility across themes === */
+.dev-link{
+  color: var(--text);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.dev-link:hover{
+  color: var(--accent);
+}
+
+</style>
 </head>
 
 <body>
@@ -478,10 +781,18 @@
          <img class="avatar" id="profilePic" src="https://i1.rgstatic.net/ii/profile.image/11431281222331997-1707176777369_Q512/Md-Minul-Alam.jpg" alt="Profile"/>
         <div class="title">
           <h1 id="profileName">Smart QR Code Generator</h1>
-	  <p>Developed by <a href="https://sites.google.com/view/mdminulalam/home" style="color: white; text-decoration: underline;" target="_blank">Md Minul Alam</a></p>
+	  <p>Developed by <a href="https://sites.google.com/view/mdminulalam/home" class="dev-link" target="_blank">Md Minul Alam</a></p>
           <p>QR Code Dashboard • Styled QR • Download • History</p>
         </div>
-      </div>
+      
+        <div class="theme-toggle" title="Toggle theme">
+          <span class="theme-label" id="themeLabel">Dark</span>
+          <label class="switch" aria-label="Theme toggle">
+            <input type="checkbox" id="themeToggle">
+            <span class="slider"></span>
+          </label>
+        </div>
+</div>
 
       <div class="content">
         <div class="label">
@@ -515,6 +826,24 @@
             <input id="logoUrl" placeholder="https://.../logo.png (optional)" />
           </div>
 
+          <!-- Logo size (professional) -->
+          <div class="field field-span2" id="logoBoxWrap" style="display:none;">
+            <div class="logo-box">
+              <div class="logo-top">
+                <span>Logo size (recommended ≤ <b>22%</b> for best scanning)</span>
+                <span class="logo-pill" id="logoPctPill">22%</span>
+              </div>
+
+              <div class="logo-row">
+                <input class="logo-range" type="range" id="logoPct" min="8" max="30" step="1" value="22" />
+              </div>
+
+              <div class="logo-tip">Tip: When a logo is used, ECC automatically switches to <b>H</b> (30%).</div>
+              <div class="logo-warn" id="logoWarn"></div>
+            </div>
+          </div>
+
+
           <div class="field">
             <div class="k">Dots shape</div>
             <select id="dotType">
@@ -545,11 +874,11 @@
           </div>
 
           <div class="field">
-            <div class="k">Error correction</div>
+            <div class="k">Error correction <span id="eccAutoBadge" style="display:none; margin-left:8px; font-size:11px; font-weight:700; padding:3px 8px; border-radius:999px; background: rgba(34,197,94,.16); border: 1px solid rgba(34,197,94,.22); color: rgba(255,255,255,.88);">AUTO</span></div>
             <select id="ecc">
               <option value="L">L (7%)</option>
-              <option value="M" selected>M (15%)</option>
-              <option value="Q">Q (25%)</option>
+              <option value="M">M (15%)</option>
+              <option value="Q" selected>Q (25%)</option>
               <option value="H">H (30%)</option>
             </select>
           </div>
@@ -732,6 +1061,115 @@
   const LS_KEY = "qrHistory_qrstyling_v2";
   const el = (id)=>document.getElementById(id);
 
+  // =========================
+  // Smart ECC (pro behavior)
+  // - Default ECC: Q (25%)
+  // - If logo is present: auto-bump to H (30%)
+  // - When logo removed: restore last user-chosen ECC (baseECC)
+  // =========================
+  let baseECC = "Q";  // remembers user's preferred ECC when no logo
+
+  function hasLogo(){
+    return ((el("logoUrl")?.value || "").trim().length > 0);
+  }
+
+  function autoSetECC(){
+    const badge = el("eccAutoBadge");
+    const eccEl = el("ecc");
+    if(!eccEl) return;
+
+    // show AUTO badge + lock dropdown when logo forces ECC
+    const logoOn = hasLogo();
+    showHideLogoBox();
+    // keep slider fill synced
+    updateLogoPctUI();
+    showHideLogoBox();
+    if(badge) badge.style.display = logoOn ? "inline-flex" : "none";
+    eccEl.disabled = logoOn;
+
+    // Remember user's choice only when there's no logo
+    if(!hasLogo()){
+      baseECC = eccEl.value || baseECC || "Q";
+    }
+
+    const want = hasLogo() ? "H" : (baseECC || "Q");
+
+    if(eccEl.value !== want){
+      eccEl.value = want;
+      // keep this subtle (no popups)
+      try{ if(logoOn) toast("ECC → H (logo)"); }catch(e){}
+    }
+  }
+
+  // Simple safety hint: if content is very long, suggest shortening if scan fails.
+  function warnIfDenseData(data, ecc){
+    const s = (data || "").trim();
+    if(!s) return;
+    const isVeryLong = s.length >= 220;  // heuristic
+    if(isVeryLong && (ecc === "H")){
+      try{ toast("Tip: very long data — shorten URL if scanning fails"); }catch(e){}
+    }
+  }
+
+  function setRangeFill(rangeEl){
+    if(!rangeEl) return;
+    const min = Number(rangeEl.min || 0);
+    const max = Number(rangeEl.max || 100);
+    const val = Number(rangeEl.value || 0);
+    const pct = ((val - min) * 100) / (max - min);
+
+    // Use theme accent for fill
+    const fill = getComputedStyle(document.body).getPropertyValue("--accent").trim() || "#43c3ff";
+    const rest = "rgba(255,255,255,.22)";
+    const restLight = "rgba(15,23,42,.18)";
+    const isLight = document.body.classList.contains("light");
+    const restColor = isLight ? restLight : rest;
+
+    rangeEl.style.background = `linear-gradient(90deg, ${fill} ${pct}%, ${restColor} ${pct}%)`;
+  }
+
+  function showHideLogoBox(){
+    const wrap = el("logoBoxWrap");
+    if(!wrap) return;
+    wrap.style.display = hasLogo() ? "block" : "none";
+  }
+
+  function updateLogoPctUI(){
+    const r = el("logoPct");
+    const pill = el("logoPctPill");
+    if(!r || !pill) return;
+    pill.textContent = `${r.value}%`;
+    setRangeFill(r);
+  }
+
+  function warnIfLogoRisky(s){
+    const w = el("logoWarn");
+    if(!w) return;
+
+    if(!hasLogo()){
+      w.style.display = "none";
+      w.textContent = "";
+      return;
+    }
+
+    const ecc = s.ecc || "H";
+    const pct = Number(s.logoScalePercent || 22);
+
+    // Practical "safe" caps (approx) by ECC
+    const maxByECC = { L: 10, M: 14, Q: 18, H: 22 };
+    const cap = maxByECC[ecc] ?? 18;
+
+    if(pct > cap){
+      w.textContent = `Warning: ${pct}% logo is large for ECC ${ecc}. Keep ≤ ${cap}% for best scanning.`;
+      w.style.display = "block";
+    }else{
+      w.style.display = "none";
+      w.textContent = "";
+    }
+  }
+
+
+
   
 
   // --- helper: create a darker/lighter shade for gradient auto-adjust ---
@@ -757,12 +1195,12 @@
     type: "canvas",
     data: " ",
     margin: 4,
-    qrOptions: { errorCorrectionLevel: "M" },
+    qrOptions: { errorCorrectionLevel: "Q" },
     backgroundOptions: { color: "#ffffff" },
     dotsOptions: { type: "square", color: "#000000" },
     cornersSquareOptions: { type: "square", color: "#000000" },
     cornersDotOptions: { type: "square", color: "#000000" },
-    imageOptions: { crossOrigin: "anonymous", margin: 6 }
+    imageOptions: { crossOrigin: "anonymous", margin: 6, imageSize: 0.22 }
   });
 
   // mount once
@@ -833,9 +1271,11 @@ function applyPreset(name){
       frameStyle: el("frameStyle").value,
       frameText: (el("frameText").value || "SCAN ME").trim(),
       frameColor: el("frameColor").value,
-      frameFont: el("frameFont").value
+      frameFont: el("frameFont").value,
+      logoScalePercent: parseInt(el("logoPct")?.value || "22", 10)
     };
   }
+
 
   function updatePill(s){
     const g = s.useGradient ? `gradient(${s.gradA}→${s.gradB})` : s.fg;
@@ -849,6 +1289,8 @@ function applyPreset(name){
 
   function updateLive(){
     if(!isGenerated) return; // prevent auto-updating before generation
+    autoSetECC();
+    updateLogoPctUI();
 
     const s = getState();
     const dotsOptions = s.useGradient
@@ -884,7 +1326,7 @@ qr.update({
   cornersSquareOptions: { type: s.cornerSquareType, color: s.fg },
   cornersDotOptions: { type: s.cornerDotType, color: s.fg },
   image: s.logo || undefined,
-  imageOptions: { crossOrigin: "anonymous", margin: 6 }
+  imageOptions: { crossOrigin: "anonymous", margin: 6, imageSize: (s.logoScalePercent||22)/100 }
 });
 
     // Make the Margin control visually obvious:
@@ -898,6 +1340,8 @@ qr.update({
 
     updatePill(s);
     updateMeta(s);
+    warnIfDenseData(s.data, s.ecc);
+    warnIfLogoRisky(s);
     window.__current = s;
     updateFrame(s);
   }
@@ -924,10 +1368,14 @@ qr.update({
     el("dotType").value = "square";
     el("cornerSquareType").value = "square";
     el("cornerDotType").value = "square";
-    el("ecc").value = "M";
+    el("ecc").value = "Q";
+    baseECC = "Q";
     el("size").value = "320";
     el("margin").value = "4";
-    el("logoUrl").value = ""; // Classic = no logo by default
+    el("logoUrl").value = "";
+    if(el("logoPct")) el("logoPct").value = "22";
+    updateLogoPctUI();
+// Classic = no logo by default
 
     // show qr area
     el("emptyPreview").style.display = "none";
@@ -1186,8 +1634,9 @@ qr.update({
     el("fg").value = s.fg || "#000000"; el("fgHex").value = el("fg").value;
     el("bg").value = s.bg || "#ffffff"; el("bgHex").value = el("bg").value;
     el("logoUrl").value = s.logo || "";
-
-    // frame restore
+    if(el("logoPct")) el("logoPct").value = String(s.logoScalePercent ?? 22);
+    updateLogoPctUI();
+// frame restore
     el("frameEnable").checked = !!s.frameEnabled;
     el("frameStyle").value = s.frameStyle || "scan";
     el("frameText").value = (s.frameText || "SCAN ME");
@@ -1222,7 +1671,7 @@ qr.update({
       cornersSquareOptions: { type: target.cornerSquareType, color: target.fg },
       cornersDotOptions: { type: target.cornerDotType, color: target.fg },
       image: target.logo || undefined,
-      imageOptions: { crossOrigin: "anonymous", margin: 6 }
+      imageOptions: { crossOrigin: "anonymous", margin: 6, imageSize: ((target.logoScalePercent||22)/100) }
     });
 
     // ensure visible
@@ -1259,7 +1708,8 @@ qr.update({
     el("dotType").value = "square";
     el("cornerSquareType").value = "square";
     el("cornerDotType").value = "square";
-    el("ecc").value = "M";
+    el("ecc").value = "Q";
+    baseECC = "Q";
     el("size").value = "320";
     el("margin").value = "4";
     el("fg").value = "#000000"; el("fgHex").value = "#000000";
@@ -1279,12 +1729,13 @@ qr.update({
   el("text").addEventListener("input", debounceUpdate);
 
   ["dotType","cornerSquareType","cornerDotType","ecc","size","margin"].forEach(id=>{
-    el(id).addEventListener("change", updateLive);
+    el(id).addEventListener("change", ()=>{ if(id==="ecc" && !hasLogo()) baseECC = el("ecc").value || baseECC; updateLive(); });
   });
 
-  el("logoUrl").addEventListener("input", debounceUpdate);
+  el("logoUrl").addEventListener("input", ()=>{ autoSetECC(); debounceUpdate(); });
 
-  el("fg").addEventListener("input", ()=>{
+  el("logoPct")?.addEventListener("input", ()=>{ updateLogoPctUI(); updateLive(); });
+el("fg").addEventListener("input", ()=>{
     const v = el("fg").value;
     el("fgHex").value = v;
 
@@ -1338,6 +1789,40 @@ qr.update({
 // init: empty by default
   renderHistory();
   resetAll(); // ensures empty preview + classic defaults in controls
+  showHideLogoBox();
+  updateLogoPctUI();
+
+
+  // --------- Theme Toggle (Dark = original design, Light = override) ----------
+  const THEME_KEY = "qr_theme_v3_exact";
+  function setTheme(mode){
+    const isLight = (mode === "light");
+    document.body.classList.toggle("light", isLight);
+    const t = el("themeToggle");
+    const label = el("themeLabel");
+    if(t) t.checked = isLight;
+    if(label) label.textContent = isLight ? "Light" : "Dark";
+    try{ localStorage.setItem(THEME_KEY, mode); }catch(e){}
+  }
+  function initTheme(){
+    let saved = null;
+    try{ saved = localStorage.getItem(THEME_KEY); }catch(e){}
+    if(saved === "light" || saved === "dark"){
+      setTheme(saved);
+      return;
+    }
+    const prefersLight = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches;
+    setTheme(prefersLight ? "light" : "dark");
+  }
+  // init toggle after DOM is ready
+  (function(){
+    initTheme();
+    const t = el("themeToggle");
+    if(t){
+      t.addEventListener("change", ()=> setTheme(t.checked ? "light" : "dark"));
+    }
+  })();
+
 </script>
 </body>
 </html>
